@@ -1,6 +1,6 @@
 #!name=QQ音乐去广告
 #!desc=深度拦截版：封杀IPv6泄露，启用透明图替换与全面域名绞杀。
-#!author=ykybl0001
+#!author=ykybl0002
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
