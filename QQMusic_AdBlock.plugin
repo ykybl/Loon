@@ -1,6 +1,6 @@
 #!name=QQ音乐去广告
-#!desc=v4极限版：剿灭动态CDN代理、封杀DoH防劫持，强杀开屏。
-#!author=ykybl0004
+#!desc=v5终极版：引入脚本实时解构主API，切除开屏与缝合广告。
+#!author=ykybl0005
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
@@ -12,7 +12,7 @@ DOMAIN-SUFFIX, doh.pub, REJECT
 DOMAIN-SUFFIX, dot.pub, REJECT
 DOMAIN-SUFFIX, dns.qq.com, REJECT
 
-# === 针对抓包发现的动态边缘 CDN 节点 (核心突破口) ===
+# === 针对抓包发现的动态边缘 CDN 节点 ===
 DOMAIN-SUFFIX, tfogc.com, REJECT
 DOMAIN-KEYWORD, tfogc, REJECT
 
@@ -55,5 +55,10 @@ DOMAIN-SUFFIX, info4.video.qq.com, REJECT
 ^https?:\/\/.*pgdt.*\.gtimg\.(com|cn)\/.* reject-img
 ^https?:\/\/splashqqlive\.gtimg\.com\/.* reject-img
 
+[Script]
+# 调用我们刚刚写的 JS 脚本，对 QQ 音乐的主数据接口进行外科手术式的开屏广告切除
+http-response ^https?:\/\/(u|c)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐开屏解构
+
 [MITM]
-hostname = *tmead*.y.qq.com, adstats.tencentmusic.com, *adsmind*.gdtimg.com, *pgdt*.gtimg.com, *pgdt*.gtimg.cn, splashqqlive.gtimg.com, *.tfogc.com
+# 必须将 u.y.qq.com 和 c.y.qq.com 加入解密，脚本才能看到里面的数据
+hostname = *tmead*.y.qq.com, adstats.tencentmusic.com, *adsmind*.gdtimg.com, *pgdt*.gtimg.com, *pgdt*.gtimg.cn, splashqqlive.gtimg.com, *.tfogc.com, u.y.qq.com, c.y.qq.com
