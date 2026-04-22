@@ -1,19 +1,21 @@
 #!name=QQ音乐去广告
 #!desc=全面拦截QQ音乐开屏广告与广点通广告，破解本地缓存。
-#!author=Paper
+#!author=任世博
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-# === QQ音乐核心广告域名 ===
+# === QQ音乐核心广告与开屏 ===
 DOMAIN-SUFFIX,tmead.y.qq.com,REJECT
 DOMAIN-SUFFIX,tmeadbak.y.qq.com,REJECT
 DOMAIN-SUFFIX,tmeadcomm.y.qq.com,REJECT
 DOMAIN-SUFFIX,ad.tencentmusic.com,REJECT
 DOMAIN-SUFFIX,adstats.tencentmusic.com,REJECT
 DOMAIN-SUFFIX,splashqqlive.gtimg.com,REJECT
+DOMAIN-MATCH,tmead,REJECT
 
 # === 广点通 (GDT) 及素材 CDN ===
 DOMAIN-SUFFIX,gdt.qq.com,REJECT
+DOMAIN-SUFFIX,mi.gdt.qq.com,REJECT
 DOMAIN-SUFFIX,e.qq.com,REJECT
 DOMAIN-SUFFIX,l.qq.com,REJECT
 DOMAIN-SUFFIX,dp3.qq.com,REJECT
@@ -23,7 +25,7 @@ DOMAIN-SUFFIX,adsmind.gdtimg.com,REJECT
 DOMAIN-SUFFIX,adsmind.tc.qq.com,REJECT
 DOMAIN-KEYWORD,adsmind,REJECT
 
-# === 腾讯遥测与行为上报 (新增) ===
+# === 腾讯遥测与行为上报 ===
 DOMAIN-SUFFIX,stat6.y.qq.com,REJECT
 DOMAIN-SUFFIX,btrace.qq.com,REJECT
 DOMAIN-SUFFIX,mtrace.qq.com,REJECT
