@@ -1,23 +1,37 @@
-# Enhanced QQMusic_AdBlock.plugin
+#!name=QQ音乐去广告 (增强版)
+#!desc=全面屏蔽QQ音乐开屏、信息流广告、广点通(GDT)多级物料及数据追踪
+#!author=Paper
+#!homepage=https://github.com/
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
-## New Blocking Rules
+[Rule]
+# === QQ音乐专属广告及开屏 ===
+DOMAIN-SUFFIX, tmead.y.qq.com, REJECT
+DOMAIN-SUFFIX, tmeadbak.y.qq.com, REJECT
+DOMAIN-SUFFIX, tmeadcomm.y.qq.com, REJECT
+DOMAIN-SUFFIX, ad.tencentmusic.com, REJECT
+DOMAIN-SUFFIX, adstats.tencentmusic.com, REJECT
+DOMAIN-SUFFIX, splashqqlive.gtimg.com, REJECT
 
-This enhanced version adds additional rules to block QQ Music ads, GDT advertisement networks, and tracking domains.
+# === 腾讯广点通 (GDT) 核心与兜底广告网络 ===
+# 拦截广点通分发、点击、曝光、转化追踪
+DOMAIN-SUFFIX, gdt.qq.com, REJECT
+DOMAIN-SUFFIX, e.qq.com, REJECT
+DOMAIN-SUFFIX, l.qq.com, REJECT
+DOMAIN-SUFFIX, dp3.qq.com, REJECT
 
-### Blocking Rules:
+# === 广点通图片/视频物料 CDN ===
+DOMAIN-SUFFIX, pgdt.gtimg.cn, REJECT
+DOMAIN-SUFFIX, pgdt.gtimg.com, REJECT
+DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
+DOMAIN-SUFFIX, adsmind.tc.qq.com, REJECT
+DOMAIN-KEYWORD, adsmind, REJECT
+DOMAIN-KEYWORD, pgdt, REJECT
 
-- **QQ Music Ads**:
-  - `||qqmusic.com^`
-  - `||music.qq.com^`
-
-- **GDT Advertisement Networks**:
-  - `||gdt.qq.com^`
-  - `||gdt.com^`
-
-- **Tracking Domains**:
-  - `||tracking.qq.com^`
-  - `||adtrack.com^`
-
-## Usage
-
-Simply replace your existing QQMusic_AdBlock.plugin file with this enhanced version to enjoy a more ad-free experience.
+# === 数据统计与行为追踪 ===
+DOMAIN-SUFFIX, stat6.y.qq.com, REJECT
+DOMAIN-SUFFIX, btrace.qq.com, REJECT
+DOMAIN-SUFFIX, mtrace.qq.com, REJECT
+DOMAIN-SUFFIX, pingma.qq.com, REJECT
+DOMAIN-SUFFIX, mta.qq.com, REJECT
+DOMAIN-SUFFIX, oth.eve.mdt.qq.com, REJECT
