@@ -1,10 +1,10 @@
 #!name=QQ音乐去广告
-#!desc=v5终极版：引入脚本实时解构主API，切除开屏与缝合广告。
-#!author=ykybl0005
+#!desc=v6终极版：暴力脚本深度切割，扩大解密与重写范围。
+#!author=ykybl0006
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-# === 阻断 HTTPDNS & DoH (防止流量隐身绕过Loon) ===
+# === 阻断 HTTPDNS & DoH (防止流量隐身) ===
 IP-CIDR, 119.29.29.29/32, REJECT, no-resolve
 DOMAIN-KEYWORD, httpdns, REJECT
 DOMAIN-SUFFIX, httpdns.pro, REJECT
@@ -12,11 +12,11 @@ DOMAIN-SUFFIX, doh.pub, REJECT
 DOMAIN-SUFFIX, dot.pub, REJECT
 DOMAIN-SUFFIX, dns.qq.com, REJECT
 
-# === 针对抓包发现的动态边缘 CDN 节点 ===
+# === 动态边缘 CDN 节点 ===
 DOMAIN-SUFFIX, tfogc.com, REJECT
 DOMAIN-KEYWORD, tfogc, REJECT
 
-# === 核心广告拦截 ===
+# === 核心广告强杀 ===
 DOMAIN-MATCH, tmead, REJECT
 DOMAIN-MATCH, adstats, REJECT
 DOMAIN-MATCH, adsmind, REJECT
@@ -31,7 +31,7 @@ DOMAIN-SUFFIX, tmeadbak.y.qq.com, REJECT
 DOMAIN-SUFFIX, tmeadcomm.y.qq.com, REJECT
 DOMAIN-SUFFIX, splashqqlive.gtimg.com, REJECT
 
-# === 广点通 (GDT) 及素材 ===
+# === 广点通 (GDT) ===
 DOMAIN-SUFFIX, gdt.qq.com, REJECT
 DOMAIN-SUFFIX, mi.gdt.qq.com, REJECT
 DOMAIN-SUFFIX, e.qq.com, REJECT
@@ -42,13 +42,13 @@ DOMAIN-SUFFIX, pgdt.gtimg.com, REJECT
 DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
 DOMAIN-SUFFIX, adsmind.tc.qq.com, REJECT
 
-# === 腾讯视频云广告源 (开屏常客) ===
+# === 腾讯视频云广告源 ===
 DOMAIN-SUFFIX, qqlive.gtimg.com, REJECT
 DOMAIN-SUFFIX, vv.video.qq.com, REJECT
 DOMAIN-SUFFIX, info4.video.qq.com, REJECT
 
 [Rewrite]
-# 强制篡改响应
+# 拦截所有可能的广告物料下载
 ^https?:\/\/.*tmead.*\.y\.qq\.com\/.* reject-dict
 ^https?:\/\/adstats\.tencentmusic\.com\/.* reject-dict
 ^https?:\/\/.*adsmind.*\.gdtimg\.com\/.* reject-img
@@ -56,9 +56,9 @@ DOMAIN-SUFFIX, info4.video.qq.com, REJECT
 ^https?:\/\/splashqqlive\.gtimg\.com\/.* reject-img
 
 [Script]
-# 调用我们刚刚写的 JS 脚本，对 QQ 音乐的主数据接口进行外科手术式的开屏广告切除
-http-response ^https?:\/\/(u|c)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐开屏解构
+# 扩大监控范围：拦截 u、c、shc 等所有可能下发缝合广告的接口
+http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐开屏解构
 
 [MITM]
-# 必须将 u.y.qq.com 和 c.y.qq.com 加入解密，脚本才能看到里面的数据
-hostname = *tmead*.y.qq.com, adstats.tencentmusic.com, *adsmind*.gdtimg.com, *pgdt*.gtimg.com, *pgdt*.gtimg.cn, splashqqlive.gtimg.com, *.tfogc.com, u.y.qq.com, c.y.qq.com
+# 将 shc.y.qq.com 加入解密列表，确保脚本能看到所有数据
+hostname = *tmead*.y.qq.com, adstats.tencentmusic.com, *adsmind*.gdtimg.com, *pgdt*.gtimg.com, *pgdt*.gtimg.cn, splashqqlive.gtimg.com, *.tfogc.com, u.y.qq.com, c.y.qq.com, shc.y.qq.com
