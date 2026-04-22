@@ -1,0 +1,11 @@
+#!name QQ Music AdBlock
+#!desc A plugin to block ads in QQ Music
+#!author ykybl
+#!homepage https://example.com
+#!icon https://example.com/icon.png
+
+[Rule]
+DOMAIN-SUFFIX,qq.com,DEMERIT
+DOMAIN-SUFFIX,tencent.com,DEMERIT
+DOMAIN-SUFFIX,gdt.qq.com,DEMERIT
+DOMAIN-SUFFIX,some-tracking-domain.com,DEMERIT
