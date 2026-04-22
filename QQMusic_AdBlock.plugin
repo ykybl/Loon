@@ -1,57 +1,51 @@
 #!name=QQ音乐去广告
-#!desc=深度拦截版：封杀IPv6泄露，启用透明图替换与全面域名绞杀。
-#!author=ykybl0002
+#!desc=深度拦截版：封杀开屏预下载、腾讯视频云素材及HTTPDNS。
+#!author=ykybl0003
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-# === 阻断 HTTPDNS (防止App绕过Loon直连IP) ===
+# === 阻断 HTTPDNS (核心防御) ===
 IP-CIDR, 119.29.29.29/32, REJECT, no-resolve
 DOMAIN-KEYWORD, httpdns, REJECT
 DOMAIN-SUFFIX, httpdns.pro, REJECT
-DOMAIN-SUFFIX, httpdns.com, REJECT
 
-# === 核心广告拦截 (激进匹配与变体拦截) ===
+# === 腾讯视频云与广告素材库 (针对视频开屏) ===
+DOMAIN-SUFFIX, qqlive.gtimg.com, REJECT
+DOMAIN-SUFFIX, vv.video.qq.com, REJECT
+DOMAIN-SUFFIX, info4.video.qq.com, REJECT
+DOMAIN-SUFFIX, splashqqlive.gtimg.com, REJECT
+
+# === QQ音乐专用广告域名 ===
 DOMAIN-MATCH, tmead, REJECT
-DOMAIN-MATCH, adstats, REJECT
-DOMAIN-MATCH, adsmind, REJECT
-DOMAIN-KEYWORD, tmead, REJECT
-
-# === 腾讯核心广告网络 (扩展) ===
-DOMAIN-SUFFIX, ad.qq.com, REJECT
-DOMAIN-SUFFIX, ads.qq.com, REJECT
-DOMAIN-SUFFIX, ad.tencentmusic.com, REJECT
-DOMAIN-SUFFIX, adstats.tencentmusic.com, REJECT
 DOMAIN-SUFFIX, tmead.y.qq.com, REJECT
 DOMAIN-SUFFIX, tmeadbak.y.qq.com, REJECT
 DOMAIN-SUFFIX, tmeadcomm.y.qq.com, REJECT
-DOMAIN-SUFFIX, splashqqlive.gtimg.com, REJECT
+DOMAIN-SUFFIX, ad.tencentmusic.com, REJECT
+DOMAIN-SUFFIX, adstats.tencentmusic.com, REJECT
+DOMAIN-SUFFIX, monitor.music.qq.com, REJECT
 
-# === 腾讯广点通 (GDT) 及素材 ===
+# === 广点通 (GDT) 全线拦截 ===
 DOMAIN-SUFFIX, gdt.qq.com, REJECT
 DOMAIN-SUFFIX, mi.gdt.qq.com, REJECT
 DOMAIN-SUFFIX, e.qq.com, REJECT
 DOMAIN-SUFFIX, l.qq.com, REJECT
-DOMAIN-SUFFIX, dp3.qq.com, REJECT
+DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
 DOMAIN-SUFFIX, pgdt.gtimg.cn, REJECT
 DOMAIN-SUFFIX, pgdt.gtimg.com, REJECT
-DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
-DOMAIN-SUFFIX, adsmind.tc.qq.com, REJECT
+DOMAIN-KEYWORD, adsmind, REJECT
 
-# === 腾讯遥测与行为上报 ===
+# === 数据上报与遥测 ===
 DOMAIN-SUFFIX, stat6.y.qq.com, REJECT
 DOMAIN-SUFFIX, btrace.qq.com, REJECT
-DOMAIN-SUFFIX, mtrace.qq.com, REJECT
 DOMAIN-SUFFIX, beacon.qq.com, REJECT
-DOMAIN-SUFFIX, oth.eve.mdt.qq.com, REJECT
 
 [Rewrite]
-# 返回空字典覆盖 JSON 缓存
-^https?:\/\/.*tmead.*\.y\.qq\.com\/.* reject-dict
-^https?:\/\/adstats\.tencentmusic\.com\/.* reject-dict
-# 返回透明图片，防止 App 请求不到物料无限重试导致界面卡顿或调用备用素材
+# 针对核心广告接口执行 HTTP 200 空内容欺骗
+^https?:\/\/.*tmead.*\.y\.qq\.com\/.* reject-200
+^https?:\/\/adstats\.tencentmusic\.com\/.* reject-200
+# 阻断广告素材下载，返回透明图
 ^https?:\/\/.*adsmind.*\.gdtimg\.com\/.* reject-img
 ^https?:\/\/.*pgdt.*\.gtimg\.(com|cn)\/.* reject-img
-^https?:\/\/splashqqlive\.gtimg\.com\/.* reject-img
 
 [MITM]
-hostname = *tmead*.y.qq.com, adstats.tencentmusic.com, *adsmind*.gdtimg.com, *pgdt*.gtimg.com, *pgdt*.gtimg.cn, splashqqlive.gtimg.com
+hostname = *tmead*.y.qq.com, adstats.tencentmusic.com, *adsmind*.gdtimg.com, *pgdt*.gtimg.com, *pgdt*.gtimg.cn, qqlive.gtimg.com
