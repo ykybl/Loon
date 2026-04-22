@@ -4,12 +4,15 @@
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
+# === QQ音乐核心广告域名 ===
 DOMAIN-SUFFIX,tmead.y.qq.com,REJECT
 DOMAIN-SUFFIX,tmeadbak.y.qq.com,REJECT
 DOMAIN-SUFFIX,tmeadcomm.y.qq.com,REJECT
 DOMAIN-SUFFIX,ad.tencentmusic.com,REJECT
 DOMAIN-SUFFIX,adstats.tencentmusic.com,REJECT
 DOMAIN-SUFFIX,splashqqlive.gtimg.com,REJECT
+
+# === 广点通 (GDT) 及素材 CDN ===
 DOMAIN-SUFFIX,gdt.qq.com,REJECT
 DOMAIN-SUFFIX,e.qq.com,REJECT
 DOMAIN-SUFFIX,l.qq.com,REJECT
@@ -19,15 +22,21 @@ DOMAIN-SUFFIX,pgdt.gtimg.com,REJECT
 DOMAIN-SUFFIX,adsmind.gdtimg.com,REJECT
 DOMAIN-SUFFIX,adsmind.tc.qq.com,REJECT
 DOMAIN-KEYWORD,adsmind,REJECT
+
+# === 腾讯遥测与行为上报 (新增) ===
 DOMAIN-SUFFIX,stat6.y.qq.com,REJECT
 DOMAIN-SUFFIX,btrace.qq.com,REJECT
 DOMAIN-SUFFIX,mtrace.qq.com,REJECT
+DOMAIN-SUFFIX,beacon.qq.com,REJECT
+DOMAIN-SUFFIX,oth.eve.mdt.qq.com,REJECT
 
 [Rewrite]
+# 篡改下发逻辑，返回空字典覆盖本地缓存
 ^https?:\/\/tmead\.y\.qq\.com\/.* reject-dict
 ^https?:\/\/tmeadcomm\.y\.qq\.com\/.* reject-dict
 ^https?:\/\/tmeadbak\.y\.qq\.com\/.* reject-dict
 ^https?:\/\/adstats\.tencentmusic\.com\/.* reject-dict
 
 [MITM]
+# 必须信任证书，以下域名的重写才能生效
 hostname = tmead.y.qq.com, tmeadcomm.y.qq.com, tmeadbak.y.qq.com, adstats.tencentmusic.com
