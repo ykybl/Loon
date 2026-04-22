@@ -1,65 +1,44 @@
 #!name=QQ音乐去广告
-#!desc=v10旗舰级优化：强杀视频广告素材源 (CDN)、阻断 QUIC 绕过、深度解构主接口 batch 请求。
-#!author=ykybl0010
+#!desc=v11紧急修复版：移除导致系统瘫痪的全局 UDP 拦截，恢复播放与系统服务正常，保留 JS 精准去广告。
+#!author=ykybl0011
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-# === 阻断 HTTPDNS & 硬编码备用 IP ===
+# === 1. 基础拦截 (保持兼容性) ===
 IP-CIDR, 119.29.29.29/32, REJECT, no-resolve
 IP-CIDR, 119.28.28.28/32, REJECT, no-resolve
-IP-CIDR, 1.2.4.8/32, REJECT, no-resolve
-IP-CIDR, 182.254.116.116/32, REJECT, no-resolve
-# 腾讯云公共 DNS IPv6
-IP6-CIDR, 2402:4e00::/32, REJECT, no-resolve
 DOMAIN-KEYWORD, httpdns, REJECT
 DOMAIN-SUFFIX, httpdns.pro, REJECT
-DOMAIN-SUFFIX, doh.pub, REJECT
-DOMAIN-SUFFIX, dot.pub, REJECT
-DOMAIN-SUFFIX, dns.qq.com, REJECT
 
-# === QUIC 强杀：彻底阻断 HTTP/3 绕过 ===
-# 阻断 QUIC 握手常用端口
-DEST-PORT, 443, REJECT, protocol=udp
-DEST-PORT, 80, REJECT, protocol=udp
-# 强制屏蔽专门负责 QUIC 广告下发的域名
+# === 2. 腾讯专有广告域名 (安全拦截) ===
+DOMAIN-SUFFIX, tmead.y.qq.com, REJECT
+DOMAIN-SUFFIX, tmeadbak.y.qq.com, REJECT
+DOMAIN-SUFFIX, tmeadcomm.y.qq.com, REJECT
+DOMAIN-SUFFIX, ad.tencentmusic.com, REJECT
+DOMAIN-SUFFIX, adstats.tencentmusic.com, REJECT
 DOMAIN-SUFFIX, tmeadquic.y.qq.com, REJECT
-DOMAIN-SUFFIX, gdtquic.qq.com, REJECT
 
-# === 视频 & 静态素材 CDN (核心源封杀) ===
-# 视频开屏广告素材服务器
-DOMAIN-SUFFIX, qqlive.gtimg.com, REJECT
-DOMAIN-SUFFIX, vv.video.qq.com, REJECT
-DOMAIN-SUFFIX, info4.video.qq.com, REJECT
-# 静态广告 CDN
-DOMAIN-SUFFIX, adcdn.tencentmusic.com, REJECT
+# === 3. 广点通及素材 (安全拦截) ===
+DOMAIN-SUFFIX, gdt.qq.com, REJECT
+DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
 DOMAIN-SUFFIX, pgdt.gtimg.cn, REJECT
 DOMAIN-SUFFIX, pgdt.gtimg.com, REJECT
-DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
 DOMAIN-SUFFIX, splashqqlive.gtimg.com, REJECT
 
-# === 核心行为追踪 & 监控 ===
-DOMAIN-SUFFIX, monitor.music.qq.com, REJECT
-DOMAIN-SUFFIX, beacon.qq.com, REJECT
-DOMAIN-SUFFIX, oth.eve.mdt.qq.com, REJECT
-DOMAIN-KEYWORD, adstats, REJECT
-
-# === 动态边缘 & 兜底 ===
-DOMAIN-SUFFIX, tfogc.com, REJECT
-DOMAIN-MATCH, tmead, REJECT
-DOMAIN-MATCH, adstats, REJECT
-DOMAIN-MATCH, adsmind, REJECT
+# === 4. 移除危险的全局规则 ===
+# 已移除: DEST-PORT, 443, REJECT, protocol=udp (该规则会导致 App Store 和微信异常)
+# 已移除: DOMAIN-SUFFIX, vv.video.qq.com (该规则会导致播放错误)
+# 已移除: DOMAIN-SUFFIX, beacon.qq.com (该规则会导致腾讯系 App 启动卡顿)
 
 [Rewrite]
-# 无限重试熔断策略：对拦截后的图片请求返回透明图，防止 App 后台死循环
 ^https?:\/\/.*adsmind.*\.gdtimg\.com\/.* reject-img
 ^https?:\/\/.*pgdt.*\.gtimg\.(com|cn)\/.* reject-img
 ^https?:\/\/splashqqlive\.gtimg\.com\/.* reject-img
 
 [Script]
-# 数据结构柔性处理 v10：支持 CgiGetAdvert/AdvertRecord 模块识别
-http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐主接口 v10 定向爆破
+# 依靠脚本进行内生式去广告，不破坏网络链路
+http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐主接口精准解构
 http-response ^https?:\/\/.*tmead.*\.y\.qq\.com\/.* script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐广告接口伪装
-http-response ^https?:\/\/adstats\.tencentmusic\.com\/.* script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐行为接口伪装
 
 [MITM]
-hostname = *tmead*.y.qq.com, adstats.tencentmusic.com, *adsmind*.gdtimg.com, *pgdt*.gtimg.com, *pgdt*.gtimg.cn, splashqqlive.gtimg.com, *.tfogc.com, u.y.qq.com, c.y.qq.com, shc.y.qq.com, monitor.music.qq.com
+hostname = *tmead*.y.qq.com, adstats.tencentmusic.com, *adsmind*.gdtimg.com, *pgdt*.gtimg.com, *pgdt*.gtimg.cn, splashqqlive.gtimg.com, u.y.qq.com, c.y.qq.com, shc.y.qq.com
