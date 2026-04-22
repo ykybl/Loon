@@ -1,9 +1,12 @@
 #!name=QQ音乐去广告
-#!desc=全面拦截QQ音乐开屏广告与广点通广告，破解本地缓存。
+#!desc=全面拦截QQ音乐开屏广告与广点通广告，支持版本探针验证。
 #!author=ykybl
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
+# === 强制拦截带 tmead (腾讯音乐广告) 的所有流量 ===
+DOMAIN-MATCH,tmead,REJECT
+
 # === QQ音乐核心广告与开屏 ===
 DOMAIN-SUFFIX,tmead.y.qq.com,REJECT
 DOMAIN-SUFFIX,tmeadbak.y.qq.com,REJECT
@@ -11,7 +14,6 @@ DOMAIN-SUFFIX,tmeadcomm.y.qq.com,REJECT
 DOMAIN-SUFFIX,ad.tencentmusic.com,REJECT
 DOMAIN-SUFFIX,adstats.tencentmusic.com,REJECT
 DOMAIN-SUFFIX,splashqqlive.gtimg.com,REJECT
-DOMAIN-MATCH,tmead,REJECT
 
 # === 广点通 (GDT) 及素材 CDN ===
 DOMAIN-SUFFIX,gdt.qq.com,REJECT
@@ -33,12 +35,10 @@ DOMAIN-SUFFIX,beacon.qq.com,REJECT
 DOMAIN-SUFFIX,oth.eve.mdt.qq.com,REJECT
 
 [Rewrite]
-# 篡改下发逻辑，返回空字典覆盖本地缓存
-^https?:\/\/tmead\.y\.qq\.com\/.* reject-dict
-^https?:\/\/tmeadcomm\.y\.qq\.com\/.* reject-dict
-^https?:\/\/tmeadbak\.y\.qq\.com\/.* reject-dict
+# 利用正则表达式，通杀所有 tmead 相关的变种域名，返回空字典覆盖本地缓存
+^https?:\/\/.*tmead.*\.y\.qq\.com\/.* reject-dict
 ^https?:\/\/adstats\.tencentmusic\.com\/.* reject-dict
 
 [MITM]
-# 必须信任证书，以下域名的重写才能生效
-hostname = tmead.y.qq.com, tmeadcomm.y.qq.com, tmeadbak.y.qq.com, adstats.tencentmusic.com
+# 扩大解密范围，加入通配符拦截动态生成的广告域名
+hostname = *tmead*.y.qq.com, adstats.tencentmusic.com
