@@ -1,6 +1,6 @@
 #!name=QQ音乐去广告
 #!desc=全面拦截QQ音乐开屏广告与广点通广告，破解本地缓存。
-#!author=任世博
+#!author=ykybl
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
