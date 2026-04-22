@@ -1,66 +1,65 @@
 #!name=QQ音乐去广告
-#!desc=v8架构级优化：保留数据结构防崩溃兜底，全面封杀硬编码备用IP。
-#!author=ykybl0008
+#!desc=v10旗舰级优化：强杀视频广告素材源 (CDN)、阻断 QUIC 绕过、深度解构主接口 batch 请求。
+#!author=ykybl0010
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-# === 阻断 HTTPDNS & 硬编码备用 IP (极其关键，防止绕过域名直连) ===
+# === 阻断 HTTPDNS & 硬编码备用 IP ===
 IP-CIDR, 119.29.29.29/32, REJECT, no-resolve
 IP-CIDR, 119.28.28.28/32, REJECT, no-resolve
 IP-CIDR, 1.2.4.8/32, REJECT, no-resolve
 IP-CIDR, 182.254.116.116/32, REJECT, no-resolve
+# 腾讯云公共 DNS IPv6
+IP6-CIDR, 2402:4e00::/32, REJECT, no-resolve
 DOMAIN-KEYWORD, httpdns, REJECT
 DOMAIN-SUFFIX, httpdns.pro, REJECT
 DOMAIN-SUFFIX, doh.pub, REJECT
 DOMAIN-SUFFIX, dot.pub, REJECT
 DOMAIN-SUFFIX, dns.qq.com, REJECT
 
-# === 动态边缘 CDN 节点 ===
-DOMAIN-SUFFIX, tfogc.com, REJECT
-DOMAIN-KEYWORD, tfogc, REJECT
+# === QUIC 强杀：彻底阻断 HTTP/3 绕过 ===
+# 阻断 QUIC 握手常用端口
+DEST-PORT, 443, REJECT, protocol=udp
+DEST-PORT, 80, REJECT, protocol=udp
+# 强制屏蔽专门负责 QUIC 广告下发的域名
+DOMAIN-SUFFIX, tmeadquic.y.qq.com, REJECT
+DOMAIN-SUFFIX, gdtquic.qq.com, REJECT
 
-# === 核心广告拦截 ===
+# === 视频 & 静态素材 CDN (核心源封杀) ===
+# 视频开屏广告素材服务器
+DOMAIN-SUFFIX, qqlive.gtimg.com, REJECT
+DOMAIN-SUFFIX, vv.video.qq.com, REJECT
+DOMAIN-SUFFIX, info4.video.qq.com, REJECT
+# 静态广告 CDN
+DOMAIN-SUFFIX, adcdn.tencentmusic.com, REJECT
+DOMAIN-SUFFIX, pgdt.gtimg.cn, REJECT
+DOMAIN-SUFFIX, pgdt.gtimg.com, REJECT
+DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
+DOMAIN-SUFFIX, splashqqlive.gtimg.com, REJECT
+
+# === 核心行为追踪 & 监控 ===
+DOMAIN-SUFFIX, monitor.music.qq.com, REJECT
+DOMAIN-SUFFIX, beacon.qq.com, REJECT
+DOMAIN-SUFFIX, oth.eve.mdt.qq.com, REJECT
+DOMAIN-KEYWORD, adstats, REJECT
+
+# === 动态边缘 & 兜底 ===
+DOMAIN-SUFFIX, tfogc.com, REJECT
 DOMAIN-MATCH, tmead, REJECT
 DOMAIN-MATCH, adstats, REJECT
 DOMAIN-MATCH, adsmind, REJECT
 
-# === 腾讯核心广告网络 ===
-DOMAIN-SUFFIX, ad.qq.com, REJECT
-DOMAIN-SUFFIX, ads.qq.com, REJECT
-DOMAIN-SUFFIX, ad.tencentmusic.com, REJECT
-DOMAIN-SUFFIX, adstats.tencentmusic.com, REJECT
-DOMAIN-SUFFIX, tmead.y.qq.com, REJECT
-DOMAIN-SUFFIX, tmeadbak.y.qq.com, REJECT
-DOMAIN-SUFFIX, tmeadcomm.y.qq.com, REJECT
-DOMAIN-SUFFIX, splashqqlive.gtimg.com, REJECT
-
-# === 广点通及素材源 ===
-DOMAIN-SUFFIX, gdt.qq.com, REJECT
-DOMAIN-SUFFIX, mi.gdt.qq.com, REJECT
-DOMAIN-SUFFIX, e.qq.com, REJECT
-DOMAIN-SUFFIX, l.qq.com, REJECT
-DOMAIN-SUFFIX, dp3.qq.com, REJECT
-DOMAIN-SUFFIX, pgdt.gtimg.cn, REJECT
-DOMAIN-SUFFIX, pgdt.gtimg.com, REJECT
-DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
-DOMAIN-SUFFIX, adsmind.tc.qq.com, REJECT
-
-# === 腾讯视频云开屏源 ===
-DOMAIN-SUFFIX, qqlive.gtimg.com, REJECT
-DOMAIN-SUFFIX, vv.video.qq.com, REJECT
-DOMAIN-SUFFIX, info4.video.qq.com, REJECT
-
 [Rewrite]
-# 无限重试熔断策略：用透明图喂饱图片请求
+# 无限重试熔断策略：对拦截后的图片请求返回透明图，防止 App 后台死循环
 ^https?:\/\/.*adsmind.*\.gdtimg\.com\/.* reject-img
 ^https?:\/\/.*pgdt.*\.gtimg\.(com|cn)\/.* reject-img
 ^https?:\/\/splashqqlive\.gtimg\.com\/.* reject-img
 
 [Script]
-# 数据结构柔性处理：清空广告内容而不删节点，防止触发 App 崩溃容灾兜底
-http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐主接口柔性解构
+# 数据结构柔性处理 v10：支持 CgiGetAdvert/AdvertRecord 模块识别
+http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐主接口 v10 定向爆破
 http-response ^https?:\/\/.*tmead.*\.y\.qq\.com\/.* script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐广告接口伪装
 http-response ^https?:\/\/adstats\.tencentmusic\.com\/.* script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐行为接口伪装
 
 [MITM]
-hostname = *tmead*.y.qq.com, adstats.tencentmusic.com, *adsmind*.gdtimg.com, *pgdt*.gtimg.com, *pgdt*.gtimg.cn, splashqqlive.gtimg.com, *.tfogc.com, u.y.qq.com, c.y.qq.com, shc.y.qq.com
+hostname = *tmead*.y.qq.com, adstats.tencentmusic.com, *adsmind*.gdtimg.com, *pgdt*.gtimg.com, *pgdt*.gtimg.cn, splashqqlive.gtimg.com, *.tfogc.com, u.y.qq.com, c.y.qq.com, shc.y.qq.com, monitor.music.qq.com
