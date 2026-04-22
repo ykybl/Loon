@@ -1,11 +1,14 @@
 #!name=QQ音乐去广告
-#!desc=v7终极伪装版：欺骗客户端防止触发本地兜底开屏。
-#!author=ykybl0007
+#!desc=v8架构级优化：保留数据结构防崩溃兜底，全面封杀硬编码备用IP。
+#!author=ykybl0008
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-# === 阻断 HTTPDNS & DoH (防止流量隐身) ===
+# === 阻断 HTTPDNS & 硬编码备用 IP (极其关键，防止绕过域名直连) ===
 IP-CIDR, 119.29.29.29/32, REJECT, no-resolve
+IP-CIDR, 119.28.28.28/32, REJECT, no-resolve
+IP-CIDR, 1.2.4.8/32, REJECT, no-resolve
+IP-CIDR, 182.254.116.116/32, REJECT, no-resolve
 DOMAIN-KEYWORD, httpdns, REJECT
 DOMAIN-SUFFIX, httpdns.pro, REJECT
 DOMAIN-SUFFIX, doh.pub, REJECT
@@ -16,12 +19,22 @@ DOMAIN-SUFFIX, dns.qq.com, REJECT
 DOMAIN-SUFFIX, tfogc.com, REJECT
 DOMAIN-KEYWORD, tfogc, REJECT
 
-# === 腾讯视频云广告源 ===
-DOMAIN-SUFFIX, qqlive.gtimg.com, REJECT
-DOMAIN-SUFFIX, vv.video.qq.com, REJECT
-DOMAIN-SUFFIX, info4.video.qq.com, REJECT
+# === 核心广告拦截 ===
+DOMAIN-MATCH, tmead, REJECT
+DOMAIN-MATCH, adstats, REJECT
+DOMAIN-MATCH, adsmind, REJECT
 
-# === 广点通及杂项素材阻断 ===
+# === 腾讯核心广告网络 ===
+DOMAIN-SUFFIX, ad.qq.com, REJECT
+DOMAIN-SUFFIX, ads.qq.com, REJECT
+DOMAIN-SUFFIX, ad.tencentmusic.com, REJECT
+DOMAIN-SUFFIX, adstats.tencentmusic.com, REJECT
+DOMAIN-SUFFIX, tmead.y.qq.com, REJECT
+DOMAIN-SUFFIX, tmeadbak.y.qq.com, REJECT
+DOMAIN-SUFFIX, tmeadcomm.y.qq.com, REJECT
+DOMAIN-SUFFIX, splashqqlive.gtimg.com, REJECT
+
+# === 广点通及素材源 ===
 DOMAIN-SUFFIX, gdt.qq.com, REJECT
 DOMAIN-SUFFIX, mi.gdt.qq.com, REJECT
 DOMAIN-SUFFIX, e.qq.com, REJECT
@@ -32,19 +45,22 @@ DOMAIN-SUFFIX, pgdt.gtimg.com, REJECT
 DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
 DOMAIN-SUFFIX, adsmind.tc.qq.com, REJECT
 
+# === 腾讯视频云开屏源 ===
+DOMAIN-SUFFIX, qqlive.gtimg.com, REJECT
+DOMAIN-SUFFIX, vv.video.qq.com, REJECT
+DOMAIN-SUFFIX, info4.video.qq.com, REJECT
+
 [Rewrite]
-# 只针对纯图片物料进行透明替换，防止无限加载
+# 无限重试熔断策略：用透明图喂饱图片请求
 ^https?:\/\/.*adsmind.*\.gdtimg\.com\/.* reject-img
 ^https?:\/\/.*pgdt.*\.gtimg\.(com|cn)\/.* reject-img
 ^https?:\/\/splashqqlive\.gtimg\.com\/.* reject-img
 
 [Script]
-# 接管主接口，剔除融合广告
-http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐主接口解构
-
-# 接管广告接口，返回伪装的空数据（解决开屏兜底的核心）
+# 数据结构柔性处理：清空广告内容而不删节点，防止触发 App 崩溃容灾兜底
+http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐主接口柔性解构
 http-response ^https?:\/\/.*tmead.*\.y\.qq\.com\/.* script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐广告接口伪装
-http-response ^https?:\/\/adstats\.tencentmusic\.com\/.* script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐广告行为伪装
+http-response ^https?:\/\/adstats\.tencentmusic\.com\/.* script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐行为接口伪装
 
 [MITM]
 hostname = *tmead*.y.qq.com, adstats.tencentmusic.com, *adsmind*.gdtimg.com, *pgdt*.gtimg.com, *pgdt*.gtimg.cn, splashqqlive.gtimg.com, *.tfogc.com, u.y.qq.com, c.y.qq.com, shc.y.qq.com
