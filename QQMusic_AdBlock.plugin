@@ -1,40 +1,33 @@
 #!name=QQ音乐去广告
-#!desc=全面屏蔽QQ音乐开屏、信息流广告，新增MitM与重写伪造空数据，破解本地缓存。
+#!desc=全面拦截QQ音乐开屏广告与广点通广告，破解本地缓存。
 #!author=Paper
-#!homepage=https://github.com/
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-# === QQ音乐专属广告及开屏 ===
-DOMAIN-SUFFIX, tmead.y.qq.com, REJECT
-DOMAIN-SUFFIX, tmeadbak.y.qq.com, REJECT
-DOMAIN-SUFFIX, tmeadcomm.y.qq.com, REJECT
-DOMAIN-SUFFIX, ad.tencentmusic.com, REJECT
-DOMAIN-SUFFIX, adstats.tencentmusic.com, REJECT
-DOMAIN-SUFFIX, splashqqlive.gtimg.com, REJECT
-
-# === 腾讯广点通 (GDT) ===
-DOMAIN-SUFFIX, gdt.qq.com, REJECT
-DOMAIN-SUFFIX, e.qq.com, REJECT
-DOMAIN-SUFFIX, l.qq.com, REJECT
-DOMAIN-SUFFIX, dp3.qq.com, REJECT
-DOMAIN-SUFFIX, pgdt.gtimg.cn, REJECT
-DOMAIN-SUFFIX, pgdt.gtimg.com, REJECT
-DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
-DOMAIN-SUFFIX, adsmind.tc.qq.com, REJECT
-DOMAIN-KEYWORD, adsmind, REJECT
-
-# === 数据统计 ===
-DOMAIN-SUFFIX, stat6.y.qq.com, REJECT
-DOMAIN-SUFFIX, btrace.qq.com, REJECT
-DOMAIN-SUFFIX, mtrace.qq.com, REJECT
+DOMAIN-SUFFIX,tmead.y.qq.com,REJECT
+DOMAIN-SUFFIX,tmeadbak.y.qq.com,REJECT
+DOMAIN-SUFFIX,tmeadcomm.y.qq.com,REJECT
+DOMAIN-SUFFIX,ad.tencentmusic.com,REJECT
+DOMAIN-SUFFIX,adstats.tencentmusic.com,REJECT
+DOMAIN-SUFFIX,splashqqlive.gtimg.com,REJECT
+DOMAIN-SUFFIX,gdt.qq.com,REJECT
+DOMAIN-SUFFIX,e.qq.com,REJECT
+DOMAIN-SUFFIX,l.qq.com,REJECT
+DOMAIN-SUFFIX,dp3.qq.com,REJECT
+DOMAIN-SUFFIX,pgdt.gtimg.cn,REJECT
+DOMAIN-SUFFIX,pgdt.gtimg.com,REJECT
+DOMAIN-SUFFIX,adsmind.gdtimg.com,REJECT
+DOMAIN-SUFFIX,adsmind.tc.qq.com,REJECT
+DOMAIN-KEYWORD,adsmind,REJECT
+DOMAIN-SUFFIX,stat6.y.qq.com,REJECT
+DOMAIN-SUFFIX,btrace.qq.com,REJECT
+DOMAIN-SUFFIX,mtrace.qq.com,REJECT
 
 [Rewrite]
-# 利用重写返回空字典，欺骗APP让其认为“服务器未下发广告”，从源头覆盖本地缓存逻辑
 ^https?:\/\/tmead\.y\.qq\.com\/.* reject-dict
 ^https?:\/\/tmeadcomm\.y\.qq\.com\/.* reject-dict
 ^https?:\/\/tmeadbak\.y\.qq\.com\/.* reject-dict
 ^https?:\/\/adstats\.tencentmusic\.com\/.* reject-dict
 
-[MitM]
+[MITM]
 hostname = tmead.y.qq.com, tmeadcomm.y.qq.com, tmeadbak.y.qq.com, adstats.tencentmusic.com
