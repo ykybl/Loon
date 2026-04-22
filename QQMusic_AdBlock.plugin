@@ -1,11 +1,29 @@
-#!name QQ Music AdBlock
-#!desc A plugin to block ads in QQ Music
-#!author ykybl
-#!homepage https://example.com
-#!icon https://example.com/icon.png
+#!name=QQ音乐去广告
+#!desc=屏蔽QQ音乐开屏广告、广点通广告物料及数据追踪上报
+#!author=Paper
+#!homepage=https://github.com/
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-DOMAIN-SUFFIX,qq.com,DEMERIT
-DOMAIN-SUFFIX,tencent.com,DEMERIT
-DOMAIN-SUFFIX,gdt.qq.com,DEMERIT
-DOMAIN-SUFFIX,some-tracking-domain.com,DEMERIT
+# === QQ音乐专属广告 ===
+# 屏蔽腾讯音乐广告下发与上报
+DOMAIN-SUFFIX, tmead.y.qq.com, REJECT
+DOMAIN, tmead.y.qq.com, REJECT
+
+# === 腾讯广点通 (GDT) 广告组件 ===
+# 屏蔽广点通 SDK 点击与曝光上报
+DOMAIN-SUFFIX, sdkreport.e.qq.com, REJECT
+# 屏蔽广点通广告图片/视频素材资源
+DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
+# 广点通其他核心广告域名兜底屏蔽
+DOMAIN-SUFFIX, gdt.qq.com, REJECT
+DOMAIN-SUFFIX, mi.gdt.qq.com, REJECT
+DOMAIN-KEYWORD, adsmind, REJECT
+
+# === 数据统计与行为追踪 ===
+# 屏蔽腾讯数据追踪与统计分析
+DOMAIN-SUFFIX, stat6.y.qq.com, REJECT
+
+# === 常见腾讯通用追踪域名 (防漏网) ===
+DOMAIN-SUFFIX, pingma.qq.com, REJECT
+DOMAIN-SUFFIX, mta.qq.com, REJECT
