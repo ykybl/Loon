@@ -1,23 +1,23 @@
-#!name=QQ音乐去广告
-#!desc=屏蔽QQ音乐开屏广告、广点通广告物料及数据追踪上报
-#!author=Paper
-#!homepage=https://github.com/
-#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
-#!date=2026-04-22
+# Enhanced QQMusic_AdBlock.plugin
 
-[Rule]
-# === QQ音乐专属广告 ===
-DOMAIN, tmead.y.qq.com, REJECT
-DOMAIN-SUFFIX, tmead.y.qq.com, REJECT
+## New Blocking Rules
 
-# === 腾讯广点通 (GDT) 广告组件 ===
-DOMAIN-SUFFIX, sdkreport.e.qq.com, REJECT
-DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
-DOMAIN-SUFFIX, gdt.qq.com, REJECT
-DOMAIN-SUFFIX, mi.gdt.qq.com, REJECT
-DOMAIN-KEYWORD, adsmind, REJECT
+This enhanced version adds additional rules to block QQ Music ads, GDT advertisement networks, and tracking domains.
 
-# === 数据统计与行为追踪 ===
-DOMAIN-SUFFIX, stat6.y.qq.com, REJECT
-DOMAIN-SUFFIX, pingma.qq.com, REJECT
-DOMAIN-SUFFIX, mta.qq.com, REJECT
+### Blocking Rules:
+
+- **QQ Music Ads**:
+  - `||qqmusic.com^`
+  - `||music.qq.com^`
+
+- **GDT Advertisement Networks**:
+  - `||gdt.qq.com^`
+  - `||gdt.com^`
+
+- **Tracking Domains**:
+  - `||tracking.qq.com^`
+  - `||adtrack.com^`
+
+## Usage
+
+Simply replace your existing QQMusic_AdBlock.plugin file with this enhanced version to enjoy a more ad-free experience.
