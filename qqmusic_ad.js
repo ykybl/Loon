@@ -1,6 +1,6 @@
 /**
- * QQ音乐响应体解构脚本 v17 (极简安全版)
- * 目标：仅移除开屏广告，完全不触碰播放页、弹窗页、营销页的数据，确保功能 100% 正常。
+ * QQ音乐响应体解构脚本 v20 (兼容净化版)
+ * 目标：在不干扰“领时长”和“激励视频”逻辑的前提下，去除开屏广告和 UI 冗余模块。
  */
 
 let url = $request.url;
@@ -10,27 +10,55 @@ if (body) {
     try {
         let obj = JSON.parse(body);
 
-        // 仅针对明确合法的开屏广告模块进行清空
-        if (url.indexOf("musicu.fcg") !== -1) {
-            const safeSplashModules = ["CgiGetAdvert", "AdvertRecord"];
-            safeSplashModules.forEach(mod => {
+        // 1. 定义明确的广告/营销清理字段
+        const targetKeys = [
+            'splash', 'splash_ad', 'adlist', 'tmead', 
+            'loginad', 'focus_ad', 'splash_video_play_info', 'ad_share_info',
+            'marketing', 'popup_info', 'vip_icon', 'msg_box', 
+            'advert_info', 'advert_list'
+        ];
+
+        function safeClean(node) {
+            if (typeof node !== 'object' || node === null) return;
+            if (Array.isArray(node)) {
+                node.forEach(safeClean);
+                return;
+            }
+            for (let key in node) {
+                let lowerKey = key.toLowerCase();
+                // ！！！注意：绝不触摸 ad_info 字段，防止领时长报错
+                if (targetKeys.includes(lowerKey)) {
+                    node[key] = Array.isArray(node[key]) ? [] : {};
+                } else {
+                    safeClean(node[key]);
+                }
+            }
+        }
+
+        // 2. 针对主接口的处理
+        if (url.indexOf("musicu.fcg") !== -1 || url.indexOf("musics.fcg") !== -1) {
+            safeClean(obj);
+            
+            // 下面这些模块直接清空数据，但不修改 code
+            const adModules = ["CgiGetAdvert", "AdvertRecord", "CgiGetMarketing"];
+            adModules.forEach(mod => {
                 for (let k in obj) {
                     if (k.includes(mod)) {
                         obj[k] = { code: 0, data: { adlist: [], splash: {} } };
                     }
                 }
             });
-            
-            // 针对开屏节点的深度清理（如果存在于主结构中）
+
+            // v20 特别保护：确保播放逻辑节点不报错
             if (obj.code === 0 && obj.data) {
                 if (obj.data.splash) obj.data.splash = {};
-                if (obj.data.ad_info) obj.data.ad_info = {};
+                // 保留 obj.data.ad_info 的原始状态
             }
         }
 
         body = JSON.stringify(obj);
     } catch (e) {
-        // 报错则原样返回
+        // 静默处理解析错误
     }
 }
 

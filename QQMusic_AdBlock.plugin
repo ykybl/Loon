@@ -1,17 +1,16 @@
-#!name=QQ音乐净化 (v19 DNS逃逸版)
-#!desc=v19核心修复：针对“网络开小差”增加 DNS no-resolve 逃逸规则，强制绕过 Loon DNS 引擎。
-#!author=ykybl0019
+#!name=QQ音乐净化 (v20 稳健净化版)
+#!desc=v20：基于 DNS 逃逸技术，找回开屏去广告与 UI 精简功能，同时通过 DIRECT 策略确保激励视频领时长功能 100% 正常。
+#!author=ykybl00120
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-# === 1. DNS 与 HTTPDNS 逃逸 (核心修复) ===
-# 强制直连且不请求解析，防止被 Loon DNS 引擎劫持
+# === 1. DNS 与 HTTPDNS 逃逸 (维持成功状态) ===
 DOMAIN, httpdns.c.y.qq.com, DIRECT, no-resolve
 DOMAIN, szu6.y.qq.com, DIRECT, no-resolve
 DOMAIN, u.y.qq.com, DIRECT, no-resolve
 DOMAIN, c.y.qq.com, DIRECT, no-resolve
 
-# === 2. 激励广告域名逃逸 (no-resolve) ===
+# === 2. 激励与弹窗域名同步逃逸 (确保不报错) ===
 DOMAIN-SUFFIX, gdt.qq.com, DIRECT, no-resolve
 DOMAIN-SUFFIX, gdtimg.com, DIRECT, no-resolve
 DOMAIN-SUFFIX, gtimg.com, DIRECT, no-resolve
@@ -25,7 +24,9 @@ IP-CIDR, 119.29.29.29/32, DIRECT, no-resolve
 IP-CIDR, 119.28.28.28/32, DIRECT, no-resolve
 
 [Script]
-# v19 暂时不加回脚本，先确保 DNS 逃逸后功能正常
+# v20：带回精准净化脚本，不再尝试物理拦截素材
+http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐全接口净化
 
 [MITM]
-hostname = 
+# 仅解密主接口，避开激励素材域名
+hostname = u.y.qq.com, c.y.qq.com, shc.y.qq.com
