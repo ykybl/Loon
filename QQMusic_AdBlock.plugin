@@ -1,40 +1,37 @@
-#!name=QQ音乐净化 (v21 无解密纯净版)
-#!desc=v21：彻底移除解密 (MitM) 以修复“领时长”网络报错。采用纯规则过滤尝试移除开屏广告，力求功能与净化的极致平衡。
-#!author=ykybl0021
+#!name=QQ音乐净化 (v22 素材爆破版)
+#!desc=v22：基于 v19 成功环境，采用“放行接口、拦截素材”策略。放行所有业务配置以修复领时长报错，定向阻断开屏图片源。
+#!author=ykybl0022
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-# === 1. DNS 逃逸与业务保活 (领时长核心) ===
-DOMAIN, httpdns.c.y.qq.com, DIRECT, no-resolve
+# === 1. 业务逻辑接口 (必须 DIRECT + no-resolve 确保功能正常) ===
 DOMAIN, szu6.y.qq.com, DIRECT, no-resolve
 DOMAIN, u.y.qq.com, DIRECT, no-resolve
 DOMAIN, c.y.qq.com, DIRECT, no-resolve
+DOMAIN, tmead.y.qq.com, DIRECT, no-resolve
+DOMAIN, ad.tencentmusic.com, DIRECT, no-resolve
+DOMAIN, adstats.tencentmusic.com, DIRECT, no-resolve
 DOMAIN-SUFFIX, i2.y.qq.com, DIRECT, no-resolve
 
-# === 2. 激励视频素材域名 (保持放行，确保能播视频领时长) ===
+# === 2. 激励视频接口 (必须放行) ===
 DOMAIN-SUFFIX, gdt.qq.com, DIRECT, no-resolve
-DOMAIN-SUFFIX, gdtimg.com, DIRECT, no-resolve
-DOMAIN-SUFFIX, gtimg.com, DIRECT, no-resolve
-DOMAIN-SUFFIX, gtimg.cn, DIRECT, no-resolve
 
-# === 3. 广告配置拦截 (不需解密，尝试干掉开屏) ===
-# 尝试拦截开屏广告配置请求
-DOMAIN-SUFFIX, tmead.y.qq.com, REJECT
-DOMAIN-SUFFIX, tmeadbak.y.qq.com, REJECT
-DOMAIN-SUFFIX, splashqqlive.gtimg.com, REJECT
-DOMAIN-SUFFIX, ad.tencentmusic.com, REJECT
-DOMAIN-SUFFIX, adstats.tencentmusic.com, REJECT
+# === 3. 定向素材拦截 (尝试拦截图片素材而不干扰逻辑) ===
+# 拦截开屏与激励视频的“图片/视频素材”源
+DOMAIN, splashqqlive.gtimg.com, REJECT
+DOMAIN, adsmind.gdtimg.com, REJECT
+# 保持对通用广告追踪的拦截
 DOMAIN-SUFFIX, mdt.qq.com, REJECT
 
-# === 4. 基础补丁 ===
+# === 4. 系统补丁 ===
 IP-CIDR, 119.29.29.29/32, DIRECT, no-resolve
 
 [Script]
-# v21 为保证领时长功能，不使用脚本
+# v22 禁用脚本以防干扰业务逻辑
 
 [Rewrite]
-# v21 为保证领时长功能，不使用重写
+# v22 禁用重写以防检测
 
 [MITM]
-# 核心：完全不解密任何域名，防止 App 检测
+# v22 彻底关闭解密，确保 App 环境检测通过
 hostname = 
