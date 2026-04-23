@@ -1,26 +1,31 @@
-#!name=QQ音乐净化工程 (v18隔离测试版)
-#!desc=v18隔离测试：移除所有脚本、重写和解密逻辑。仅作为域名放行测试，用于排查“网络异常”的根源。
-#!author=ykybl0018
+#!name=QQ音乐净化 (v19 DNS逃逸版)
+#!desc=v19核心修复：针对“网络开小差”增加 DNS no-resolve 逃逸规则，强制绕过 Loon DNS 引擎。
+#!author=ykybl0019
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-# === 1. 全放通模式 ===
-IP-CIDR, 119.29.29.29/32, DIRECT
-DOMAIN-KEYWORD, httpdns, DIRECT
-DOMAIN-SUFFIX, y.qq.com, DIRECT
-DOMAIN-SUFFIX, music.qq.com, DIRECT
-DOMAIN-SUFFIX, tencentmusic.com, DIRECT
-DOMAIN-SUFFIX, gdt.qq.com, DIRECT
-DOMAIN-SUFFIX, gdtimg.com, DIRECT
-DOMAIN-SUFFIX, gtimg.com, DIRECT
-DOMAIN-SUFFIX, gtimg.cn, DIRECT
+# === 1. DNS 与 HTTPDNS 逃逸 (核心修复) ===
+# 强制直连且不请求解析，防止被 Loon DNS 引擎劫持
+DOMAIN, httpdns.c.y.qq.com, DIRECT, no-resolve
+DOMAIN, szu6.y.qq.com, DIRECT, no-resolve
+DOMAIN, u.y.qq.com, DIRECT, no-resolve
+DOMAIN, c.y.qq.com, DIRECT, no-resolve
+
+# === 2. 激励广告域名逃逸 (no-resolve) ===
+DOMAIN-SUFFIX, gdt.qq.com, DIRECT, no-resolve
+DOMAIN-SUFFIX, gdtimg.com, DIRECT, no-resolve
+DOMAIN-SUFFIX, gtimg.com, DIRECT, no-resolve
+DOMAIN-SUFFIX, gtimg.cn, DIRECT, no-resolve
+DOMAIN-SUFFIX, i2.y.qq.com, DIRECT, no-resolve
+DOMAIN-SUFFIX, tmead.y.qq.com, DIRECT, no-resolve
+DOMAIN-SUFFIX, adstats.tencentmusic.com, DIRECT, no-resolve
+
+# === 3. 基础 IP 绕过 ===
+IP-CIDR, 119.29.29.29/32, DIRECT, no-resolve
+IP-CIDR, 119.28.28.28/32, DIRECT, no-resolve
 
 [Script]
-# v18 移除所有脚本
-
-[Rewrite]
-# v18 移除所有重写
+# v19 暂时不加回脚本，先确保 DNS 逃逸后功能正常
 
 [MITM]
-# v18 关闭所有主机名解密
 hostname = 
