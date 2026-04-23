@@ -1,42 +1,30 @@
 #!name=QQ音乐去广告
-#!desc=v16稳健版：修复“网络开小差”报错，移除侵入性伪造逻辑。通过域名放行与精准素材封锁，尝试恢复原生“领时长”功能。
-#!author=ykybl0016
+#!desc=v17功能恢复版：全面移除干扰“领时长”功能的拦截策略，确保广告功能不报错。仅保留核心开屏去广告。
+#!author=ykybl0017
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-# === 1. 基础拦截 ===
-IP-CIDR, 119.29.29.29/32, REJECT, no-resolve
-IP-CIDR, 119.28.28.28/32, REJECT, no-resolve
-DOMAIN-KEYWORD, httpdns, REJECT
-DOMAIN-SUFFIX, httpdns.pro, REJECT
+# === 1. 基础连接保护 ===
+IP-CIDR, 119.29.29.29/32, DIRECT
+DOMAIN-KEYWORD, httpdns, DIRECT
 
-# === 2. 业务域名放行 (确保领时长逻辑正常) ===
-# 允许弹窗、激励、营销接口原样通过，不进行脚本干预
+# === 2. 广告素材与营销接口 (全部放行以修复报错) ===
 DOMAIN-SUFFIX, i2.y.qq.com, DIRECT
 DOMAIN-SUFFIX, mb.y.qq.com, DIRECT
 DOMAIN-SUFFIX, tmead.y.qq.com, DIRECT
 DOMAIN-SUFFIX, adstats.tencentmusic.com, DIRECT
+DOMAIN-SUFFIX, gdt.qq.com, DIRECT
+DOMAIN-SUFFIX, gdtimg.com, DIRECT
+DOMAIN-SUFFIX, gtimg.cn, DIRECT
+DOMAIN-SUFFIX, gtimg.com, DIRECT
 
-# === 3. 精准素材拦截 (强制视频广告白屏/跳过) ===
-# 拦截所有已知的腾讯广告视频/图片素材源
-DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
-DOMAIN-SUFFIX, pgdt.gtimg.cn, REJECT
-DOMAIN-SUFFIX, pgdt.gtimg.com, REJECT
-DOMAIN-SUFFIX, splashqqlive.gtimg.com, REJECT
-DOMAIN-SUFFIX, mdt.qq.com, REJECT
-
-# === 4. 系统补丁 (保持 App Store 正常) ===
-# 移除所有全局端口拦截规则
-
-[Rewrite]
-^https?:\/\/.*adsmind.*\.gdtimg\.com\/.* reject-img
-^https?:\/\/.*pgdt.*\.gtimg\.(com|cn)\/.* reject-img
-^https?:\/\/splashqqlive\.gtimg\.com\/.* reject-img
+# === 3. 拦截特定上报 (可选) ===
+# 暂时放行所有上报以确保业务流程完整
 
 [Script]
-# 数据结构柔性分色：仅处理主业务接口的纯净化
-http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐主接口净化
+# v17 仅保留开屏广告精准处理，不触碰业务逻辑
+http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐净化
 
 [MITM]
-# v16 缩小解密范围：移除 i2.y.qq.com, adstats, tmead，防止解析失败
-hostname = u.y.qq.com, c.y.qq.com, shc.y.qq.com, *adsmind*.gdtimg.com, *pgdt*.gtimg.com, *pgdt*.gtimg.cn, splashqqlive.gtimg.com
+# 极简模式：仅解密主接口
+hostname = u.y.qq.com, c.y.qq.com, shc.y.qq.com
