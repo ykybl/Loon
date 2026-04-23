@@ -1,9 +1,7 @@
 /**
- * QQ音乐响应体解构脚本 v15 (激励大满贯)
- * 逻辑：由“防御型拦截”转为“进攻型伪装”。
- * 核心功能：
- *   1. 模拟领取激励时长 (GetWatchAdFreeTime/CgiGetReward)。
- *   2. 继续清理开屏、商业弹窗、信息流广告。
+ * QQ音乐响应体解构脚本 v16 (稳健回归版)
+ * 逻辑：移除导致“网络开小差”的实验性伪造逻辑，回归至更稳定的深度去广告模式。
+ * 对激励视频：由 Plugin 直接放行接口逻辑，仅由 Rewrite 拦截其图片/视频素材。
  */
 
 let url = $request.url;
@@ -37,80 +35,40 @@ if (body) {
             }
         }
 
-        // 2. 激励/权限伪装：模拟已观看广告
-        function fakeVipStatus(node) {
+        // 2. 移除全屏阻断提示，但不篡改权限数据
+        function removePopups(node) {
             if (typeof node !== 'object' || node === null) return;
             if (Array.isArray(node)) {
-                node.forEach(fakeVipStatus);
+                node.forEach(removePopups);
                 return;
             }
             for (let key in node) {
                 if (key === 'play_popup' || key === 'end_popup' || key === 'popup_content') {
                     node[key] = {};
-                }
-                if (key === 'free_listen_info') {
-                    node[key] = {
-                        "is_free": true,
-                        "remain_time": 3600,
-                        "has_free_listen_privilege": true,
-                        "show_free_listen_entry": false
-                    };
-                }
-                if (typeof node[key] === 'object') {
-                    fakeVipStatus(node[key]);
+                } else if (typeof node[key] === 'object') {
+                    removePopups(node[key]);
                 }
             }
         }
 
-        // 策略 A：主接口 musicu.fcg
         if (url.indexOf("musicu.fcg") !== -1 || url.indexOf("musics.fcg") !== -1) {
             safeClean(obj);
-            fakeVipStatus(obj);
+            removePopups(obj);
             
-            // 针对特定激励接口强行返回成功报文
-            const rewardModules = [
-                "GetWatchAdFreeTime", 
-                "CgiGetReward", 
-                "GetAdFreePlayInfo", 
-                "GetMarketing",
-                "CgiBatchGetAdvert"
-            ];
-            
-            rewardModules.forEach(mod => {
+            // 下面这些模块直接清空数据，但不修改 code
+            const adModules = ["CgiGetAdvert", "AdvertRecord", "CgiGetMarketing"];
+            adModules.forEach(mod => {
                 for (let k in obj) {
                     if (k.includes(mod)) {
-                        obj[k] = { 
-                            code: 0, 
-                            data: { 
-                                code: 0,
-                                ret: 0,
-                                remaining_time: 3600, 
-                                is_free: true,
-                                free_time: 3600,
-                                has_free_listen_privilege: true,
-                                splash: {}, 
-                                adlist: [] 
-                            } 
-                        };
+                        obj[k] = { code: 0, data: { adlist: [], splash: {}, marketing_info: {} } };
                     }
                 }
             });
         }
 
-        // 策略 B：针对 tmead 和 adstats 的响应劫持，返回完美的空成功状态
-        if (url.indexOf("tmead") !== -1 || url.indexOf("adstats") !== -1 || url.indexOf("i2.y.qq.com") !== -1) {
-            obj = {
-                "ret": 0, "code": 0, "msg": "ok",
-                "data": { 
-                    "adList": [], "splash": {}, "ad_info": {},
-                    "remaining_time": 3600, "is_free": true 
-                }
-            };
-        }
-
         body = JSON.stringify(obj);
     } catch (e) {
-        // console.log("QQMusic v15 Error: " + e);
+        // 静默处理解析错误
     }
 }
 
