@@ -13,7 +13,7 @@
 ## 已上线插件
 
 ### 1. 微信去广告 (WeChat_AdBlock)
-- **功能**: 精准去除朋友圈广告、视频号/公众号植入式推荐、公众号文章广告。
+- **功能**: 超级净化版。精准去除朋友圈广告、视频号/公众号植入式推荐、公众号文章广告。结合墨鱼、BlackMatrix7 等社区逻辑。
 - **配置**: [WeChat_AdBlock.plugin](https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/WeChat_AdBlock.plugin)
 - **要求**: 需开启 MITM 并信任证书。
 
