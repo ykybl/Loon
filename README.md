@@ -14,19 +14,21 @@
 
 ### 1. 微信去广告 (WeChat_AdBlock)
 - **功能**: 精准去除朋友圈广告、视频号/公众号植入式推荐、公众号文章广告。
-- **配置**: [WeChat_AdBlock.plugin](Plugin/WeChat_AdBlock.plugin)
+- **配置**: [WeChat_AdBlock.plugin](https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/WeChat_AdBlock.plugin)
 - **要求**: 需开启 MITM 并信任证书。
 
 ### 2. QQ 音乐去广告 (QQMusic_AdBlock)
 - **功能**: 拦截开屏广告、屏蔽主接口弹窗及营销页面、净化主接口数据结构。
-- **配置**: [QQMusic_AdBlock.plugin](Plugin/QQMusic_AdBlock.plugin)
+- **配置**: [QQMusic_AdBlock.plugin](https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/QQMusic_AdBlock.plugin)
 
 ## 如何使用
 
 1. 打开 Loon App。
 2. 进入 `配置` -> `插件`。
 3. 点击 `+` 号，选择 `从 URL 下载`。
-4. 输入对应插件的 Raw 链接（例如：`https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/WeChat_AdBlock.plugin`）。
+4. 输入对应插件的 Raw 代理链接（建议复制下方链接）：
+   - 微信: `https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/WeChat_AdBlock.plugin`
+   - QQ音乐: `https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/QQMusic_AdBlock.plugin`
 5. 开启插件，并确保 MITM 主机名中已包含插件所需的域名。
 
 ## 免责声明
