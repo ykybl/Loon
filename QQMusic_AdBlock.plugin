@@ -1,32 +1,40 @@
-#!name=QQ音乐净化 (v20 稳健净化版)
-#!desc=v20：基于 DNS 逃逸技术，找回开屏去广告与 UI 精简功能，同时通过 DIRECT 策略确保激励视频领时长功能 100% 正常。
-#!author=ykybl00120
+#!name=QQ音乐净化 (v21 无解密纯净版)
+#!desc=v21：彻底移除解密 (MitM) 以修复“领时长”网络报错。采用纯规则过滤尝试移除开屏广告，力求功能与净化的极致平衡。
+#!author=ykybl0021
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-# === 1. DNS 与 HTTPDNS 逃逸 (维持成功状态) ===
+# === 1. DNS 逃逸与业务保活 (领时长核心) ===
 DOMAIN, httpdns.c.y.qq.com, DIRECT, no-resolve
 DOMAIN, szu6.y.qq.com, DIRECT, no-resolve
 DOMAIN, u.y.qq.com, DIRECT, no-resolve
 DOMAIN, c.y.qq.com, DIRECT, no-resolve
+DOMAIN-SUFFIX, i2.y.qq.com, DIRECT, no-resolve
 
-# === 2. 激励与弹窗域名同步逃逸 (确保不报错) ===
+# === 2. 激励视频素材域名 (保持放行，确保能播视频领时长) ===
 DOMAIN-SUFFIX, gdt.qq.com, DIRECT, no-resolve
 DOMAIN-SUFFIX, gdtimg.com, DIRECT, no-resolve
 DOMAIN-SUFFIX, gtimg.com, DIRECT, no-resolve
 DOMAIN-SUFFIX, gtimg.cn, DIRECT, no-resolve
-DOMAIN-SUFFIX, i2.y.qq.com, DIRECT, no-resolve
-DOMAIN-SUFFIX, tmead.y.qq.com, DIRECT, no-resolve
-DOMAIN-SUFFIX, adstats.tencentmusic.com, DIRECT, no-resolve
 
-# === 3. 基础 IP 绕过 ===
+# === 3. 广告配置拦截 (不需解密，尝试干掉开屏) ===
+# 尝试拦截开屏广告配置请求
+DOMAIN-SUFFIX, tmead.y.qq.com, REJECT
+DOMAIN-SUFFIX, tmeadbak.y.qq.com, REJECT
+DOMAIN-SUFFIX, splashqqlive.gtimg.com, REJECT
+DOMAIN-SUFFIX, ad.tencentmusic.com, REJECT
+DOMAIN-SUFFIX, adstats.tencentmusic.com, REJECT
+DOMAIN-SUFFIX, mdt.qq.com, REJECT
+
+# === 4. 基础补丁 ===
 IP-CIDR, 119.29.29.29/32, DIRECT, no-resolve
-IP-CIDR, 119.28.28.28/32, DIRECT, no-resolve
 
 [Script]
-# v20：带回精准净化脚本，不再尝试物理拦截素材
-http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐全接口净化
+# v21 为保证领时长功能，不使用脚本
+
+[Rewrite]
+# v21 为保证领时长功能，不使用重写
 
 [MITM]
-# 仅解密主接口，避开激励素材域名
-hostname = u.y.qq.com, c.y.qq.com, shc.y.qq.com
+# 核心：完全不解密任何域名，防止 App 检测
+hostname = 
