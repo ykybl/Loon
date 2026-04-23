@@ -1,26 +1,46 @@
-#!name=QQ音乐稳定版 (v25 最终版)
-#!desc=v25：确认环境冲突，彻底放弃解密与拦截以确保“领时长”功能。这是权衡功能性后的最终稳定版本。
-#!author=ykybl0025
+#!name=QQ音乐(极致净化版)
+#!desc=v26：放弃领时长功能，开启全域强杀。拦截所有广告配置、素材、追踪及营销弹窗，实现界面极致纯净。
+#!author=ykybl0026
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-# === 1. 核心业务与广告域同步放行 (确保领时长 100% 成功) ===
-DOMAIN, httpdns.c.y.qq.com, DIRECT, no-resolve
-DOMAIN, szu6.y.qq.com, DIRECT, no-resolve
-DOMAIN, u.y.qq.com, DIRECT, no-resolve
-DOMAIN, c.y.qq.com, DIRECT, no-resolve
-DOMAIN, tmead.y.qq.com, DIRECT, no-resolve
-DOMAIN, ad.tencentmusic.com, DIRECT, no-resolve
-DOMAIN, adstats.tencentmusic.com, DIRECT, no-resolve
-DOMAIN-SUFFIX, i2.y.qq.com, DIRECT, no-resolve
-DOMAIN-SUFFIX, gdt.qq.com, DIRECT, no-resolve
-DOMAIN-SUFFIX, gdtimg.com, DIRECT, no-resolve
-DOMAIN-SUFFIX, gtimg.com, DIRECT, no-resolve
-DOMAIN-SUFFIX, gtimg.cn, DIRECT, no-resolve
+# === 1. 系统保护 (避开 Apple/微信关键端口) ===
+DOMAIN-KEYWORD, httpdns, REJECT
+DOMAIN-SUFFIX, httpdns.pro, REJECT
 
-# === 2. 基础补丁 ===
-IP-CIDR, 119.29.29.29/32, DIRECT, no-resolve
+# === 2. 全域阻断广告与营销域名 ===
+DOMAIN-SUFFIX, tmead.y.qq.com, REJECT
+DOMAIN-SUFFIX, tmeadbak.y.qq.com, REJECT
+DOMAIN-SUFFIX, tmeadcomm.y.qq.com, REJECT
+DOMAIN-SUFFIX, tmeadquic.y.qq.com, REJECT
+DOMAIN-SUFFIX, ad.tencentmusic.com, REJECT
+DOMAIN-SUFFIX, adstats.tencentmusic.com, REJECT
+DOMAIN-SUFFIX, i2.y.qq.com, REJECT
+DOMAIN-SUFFIX, mb.y.qq.com, REJECT
+DOMAIN-SUFFIX, sh.y.qq.com, REJECT
+DOMAIN-SUFFIX, mdt.qq.com, REJECT
+
+# === 3. 广点通及素材源封杀 ===
+DOMAIN-SUFFIX, gdt.qq.com, REJECT
+DOMAIN-SUFFIX, v.gdt.qq.com, REJECT
+DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
+DOMAIN-SUFFIX, pgdt.gtimg.cn, REJECT
+DOMAIN-SUFFIX, pgdt.gtimg.com, REJECT
+DOMAIN-SUFFIX, splashqqlive.gtimg.com, REJECT
+
+# === 4. 基础补丁 ===
+IP-CIDR, 119.29.29.29/32, REJECT, no-resolve
+IP-CIDR, 119.28.28.28/32, REJECT, no-resolve
+
+[Rewrite]
+^https?:\/\/.*adsmind.*\.gdtimg\.com\/.* reject-img
+^https?:\/\/.*pgdt.*\.gtimg\.(com|cn)\/.* reject-img
+^https?:\/\/splashqqlive\.gtimg\.com\/.* reject-img
+
+[Script]
+# 数据结构深度手术
+http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐主接口深度去广告
+http-response ^https?:\/\/.*tmead.*\.y\.qq\.com\/.* script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐广告接口伪装
 
 [MITM]
-# 最终确定：不解密任何主机名以避开 SDK 检测
-hostname = 
+hostname = *tmead*.y.qq.com, adstats.tencentmusic.com, *adsmind*.gdtimg.com, *pgdt*.gtimg.com, *pgdt*.gtimg.cn, splashqqlive.gtimg.com, u.y.qq.com, c.y.qq.com, shc.y.qq.com, i2.y.qq.com

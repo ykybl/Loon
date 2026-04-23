@@ -1,6 +1,7 @@
 /**
- * QQ音乐响应体解构脚本 v20 (兼容净化版)
- * 目标：在不干扰“领时长”和“激励视频”逻辑的前提下，去除开屏广告和 UI 冗余模块。
+ * QQ音乐响应体解构脚本 v26 (全域强杀版)
+ * 目标：无差别清理所有广告、营销、弹窗、追踪。
+ * 注意：由于开启了深度修改，可能会导致“看广告免费听”等激励功能报网络异常，请知悉。
  */
 
 let url = $request.url;
@@ -10,55 +11,63 @@ if (body) {
     try {
         let obj = JSON.parse(body);
 
-        // 1. 定义明确的广告/营销清理字段
+        // 深度递归置空所有已知的广告及营销相关容器
         const targetKeys = [
-            'splash', 'splash_ad', 'adlist', 'tmead', 
+            'ad_info', 'splash', 'splash_ad', 'adlist', 'tmead', 
             'loginad', 'focus_ad', 'splash_video_play_info', 'ad_share_info',
             'marketing', 'popup_info', 'vip_icon', 'msg_box', 
-            'advert_info', 'advert_list'
+            'advert_info', 'advert_list', 'free_listen_info', 'popup_content'
         ];
 
-        function safeClean(node) {
+        function deepClean(node) {
             if (typeof node !== 'object' || node === null) return;
             if (Array.isArray(node)) {
-                node.forEach(safeClean);
+                node.forEach(deepClean);
                 return;
             }
             for (let key in node) {
                 let lowerKey = key.toLowerCase();
-                // ！！！注意：绝不触摸 ad_info 字段，防止领时长报错
                 if (targetKeys.includes(lowerKey)) {
                     node[key] = Array.isArray(node[key]) ? [] : {};
+                } else if (key === 'play_popup' || key === 'end_popup') {
+                    node[key] = {};
                 } else {
-                    safeClean(node[key]);
+                    deepClean(node[key]);
                 }
             }
         }
 
-        // 2. 针对主接口的处理
         if (url.indexOf("musicu.fcg") !== -1 || url.indexOf("musics.fcg") !== -1) {
-            safeClean(obj);
+            deepClean(obj);
             
-            // 下面这些模块直接清空数据，但不修改 code
-            const adModules = ["CgiGetAdvert", "AdvertRecord", "CgiGetMarketing"];
+            // 针对特定模块强制置空数据
+            const adModules = [
+                "CgiGetAdvert", 
+                "AdvertRecord", 
+                "CgiGetMarketing", 
+                "CgiGetVipIcon", 
+                "GetWatchAdFreeTime"
+            ];
             adModules.forEach(mod => {
                 for (let k in obj) {
                     if (k.includes(mod)) {
-                        obj[k] = { code: 0, data: { adlist: [], splash: {} } };
+                        obj[k] = { code: 0, data: { adlist: [], splash: {}, marketing_info: {} } };
                     }
                 }
             });
+        }
 
-            // v20 特别保护：确保播放逻辑节点不报错
-            if (obj.code === 0 && obj.data) {
-                if (obj.data.splash) obj.data.splash = {};
-                // 保留 obj.data.ad_info 的原始状态
-            }
+        // 处理其他域名（tmead 等）返回的数据包，直接伪装成功且没数据的状态
+        if (url.indexOf("tmead") !== -1 || url.indexOf("adstats") !== -1 || url.indexOf("i2.y.qq.com") !== -1) {
+            obj = {
+                "ret": 0, "code": 0, "msg": "ok",
+                "data": { "adList": [], "splash": {}, "ad_info": {} }
+            };
         }
 
         body = JSON.stringify(obj);
     } catch (e) {
-        // 静默处理解析错误
+        // 解析异常则跳过
     }
 }
 
