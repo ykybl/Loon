@@ -1,30 +1,26 @@
-#!name=QQ音乐去广告
-#!desc=v17功能恢复版：全面移除干扰“领时长”功能的拦截策略，确保广告功能不报错。仅保留核心开屏去广告。
-#!author=ykybl0017
+#!name=QQ音乐净化工程 (v18隔离测试版)
+#!desc=v18隔离测试：移除所有脚本、重写和解密逻辑。仅作为域名放行测试，用于排查“网络异常”的根源。
+#!author=ykybl0018
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-# === 1. 基础连接保护 ===
+# === 1. 全放通模式 ===
 IP-CIDR, 119.29.29.29/32, DIRECT
 DOMAIN-KEYWORD, httpdns, DIRECT
-
-# === 2. 广告素材与营销接口 (全部放行以修复报错) ===
-DOMAIN-SUFFIX, i2.y.qq.com, DIRECT
-DOMAIN-SUFFIX, mb.y.qq.com, DIRECT
-DOMAIN-SUFFIX, tmead.y.qq.com, DIRECT
-DOMAIN-SUFFIX, adstats.tencentmusic.com, DIRECT
+DOMAIN-SUFFIX, y.qq.com, DIRECT
+DOMAIN-SUFFIX, music.qq.com, DIRECT
+DOMAIN-SUFFIX, tencentmusic.com, DIRECT
 DOMAIN-SUFFIX, gdt.qq.com, DIRECT
 DOMAIN-SUFFIX, gdtimg.com, DIRECT
-DOMAIN-SUFFIX, gtimg.cn, DIRECT
 DOMAIN-SUFFIX, gtimg.com, DIRECT
-
-# === 3. 拦截特定上报 (可选) ===
-# 暂时放行所有上报以确保业务流程完整
+DOMAIN-SUFFIX, gtimg.cn, DIRECT
 
 [Script]
-# v17 仅保留开屏广告精准处理，不触碰业务逻辑
-http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐净化
+# v18 移除所有脚本
+
+[Rewrite]
+# v18 移除所有重写
 
 [MITM]
-# 极简模式：仅解密主接口
-hostname = u.y.qq.com, c.y.qq.com, shc.y.qq.com
+# v18 关闭所有主机名解密
+hostname = 
