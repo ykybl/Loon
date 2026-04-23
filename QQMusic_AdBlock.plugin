@@ -1,36 +1,35 @@
-#!name=QQ音乐(极致净化版)
-#!desc=v26：放弃领时长功能，开启全域强杀。拦截所有广告配置、素材、追踪及营销弹窗，实现界面极致纯净。
-#!author=ykybl0026
+#!name=QQ音乐(回滚版)
+#!desc=v27：回滚至 v13 版逻辑。基于前期抓包封杀 i2 弹窗源，恢复稳定的主接口净化。
+#!author=ykybl0027
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-# === 1. 系统保护 (避开 Apple/微信关键端口) ===
+# === 1. 基础拦截 ===
+IP-CIDR, 119.29.29.29/32, REJECT, no-resolve
+IP-CIDR, 119.28.28.28/32, REJECT, no-resolve
 DOMAIN-KEYWORD, httpdns, REJECT
 DOMAIN-SUFFIX, httpdns.pro, REJECT
 
-# === 2. 全域阻断广告与营销域名 ===
-DOMAIN-SUFFIX, tmead.y.qq.com, REJECT
-DOMAIN-SUFFIX, tmeadbak.y.qq.com, REJECT
-DOMAIN-SUFFIX, tmeadcomm.y.qq.com, REJECT
-DOMAIN-SUFFIX, tmeadquic.y.qq.com, REJECT
-DOMAIN-SUFFIX, ad.tencentmusic.com, REJECT
-DOMAIN-SUFFIX, adstats.tencentmusic.com, REJECT
+# === 2. 定向阻断 H5 弹窗与营销页面 ===
 DOMAIN-SUFFIX, i2.y.qq.com, REJECT
 DOMAIN-SUFFIX, mb.y.qq.com, REJECT
 DOMAIN-SUFFIX, sh.y.qq.com, REJECT
 DOMAIN-SUFFIX, mdt.qq.com, REJECT
 
-# === 3. 广点通及素材源封杀 ===
+# === 3. 腾讯专有广告域名 ===
+DOMAIN-SUFFIX, tmead.y.qq.com, REJECT
+DOMAIN-SUFFIX, tmeadbak.y.qq.com, REJECT
+DOMAIN-SUFFIX, tmeadcomm.y.qq.com, REJECT
+DOMAIN-SUFFIX, ad.tencentmusic.com, REJECT
+DOMAIN-SUFFIX, adstats.tencentmusic.com, REJECT
+DOMAIN-SUFFIX, tmeadquic.y.qq.com, REJECT
+
+# === 广点通及素材 ===
 DOMAIN-SUFFIX, gdt.qq.com, REJECT
-DOMAIN-SUFFIX, v.gdt.qq.com, REJECT
 DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
 DOMAIN-SUFFIX, pgdt.gtimg.cn, REJECT
 DOMAIN-SUFFIX, pgdt.gtimg.com, REJECT
 DOMAIN-SUFFIX, splashqqlive.gtimg.com, REJECT
-
-# === 4. 基础补丁 ===
-IP-CIDR, 119.29.29.29/32, REJECT, no-resolve
-IP-CIDR, 119.28.28.28/32, REJECT, no-resolve
 
 [Rewrite]
 ^https?:\/\/.*adsmind.*\.gdtimg\.com\/.* reject-img
@@ -38,8 +37,8 @@ IP-CIDR, 119.28.28.28/32, REJECT, no-resolve
 ^https?:\/\/splashqqlive\.gtimg\.com\/.* reject-img
 
 [Script]
-# 数据结构深度手术
-http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐主接口深度去广告
+# 数据结构柔性处理
+http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐主接口精准解构
 http-response ^https?:\/\/.*tmead.*\.y\.qq\.com\/.* script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐广告接口伪装
 
 [MITM]
