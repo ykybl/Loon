@@ -1,7 +1,7 @@
 /**
  * @name WeChat_AdBlock.js
  * @desc 微信去广告脚本 - 处理朋友圈和公众号广告
- * @author ykybl0001
+ * @author ykybl0027 (AI Generated)
  * @updated 2026-04-23
  */
 
@@ -12,13 +12,13 @@ try {
     if (url.indexOf("/mp/getappmsgad") > -1) {
         // 公众号文章广告
         let obj = JSON.parse(body);
-        if (obj.advertisement_num > 0 || obj.ad_info) {
+        if (obj.advertisement_num > 0) {
             obj.advertisement_num = 0;
             obj.advertisement_info = [];
-            if (obj.ad_info) obj.ad_info = [];
-            console.log("微信公众号广告已净化");
+            delete obj.ad_info;
         }
         body = JSON.stringify(obj);
+        console.log("微信公众号广告已净化");
     } 
     else if (url.indexOf("/cgi-bin/micromsg-bin/gettimeline") > -1) {
         // 朋友圈广告
@@ -27,15 +27,11 @@ try {
             const initialCount = obj.TimelineObjectList.length;
             obj.TimelineObjectList = obj.TimelineObjectList.filter(item => {
                 // 常见的广告标记字段
-                if (item.ADInfo || item.AdInfo || item.advertisement || item.is_ad || item.ad_info || item.ad_xml) {
+                if (item.ADInfo || item.AdInfo || item.advertisement || item.is_ad) {
                     return false;
                 }
                 // 检查内容中是否包含推广字样（部分版本）
-                if (item.Content && (item.Content.indexOf("推广") > -1 || item.Content.indexOf("advertisement") > -1)) {
-                    return false;
-                }
-                // 深度检查 SnsObject 中的字段
-                if (item.SnsObject && (item.SnsObject.ADInfo || item.SnsObject.is_ad)) {
+                if (item.Content && item.Content.indexOf("推广") > -1) {
                     return false;
                 }
                 return true;
@@ -45,8 +41,7 @@ try {
         body = JSON.stringify(obj);
     }
 } catch (e) {
-    // 可能是 Protobuf 格式或其他无法解析的格式
-    // console.log("微信去广告脚本执行异常: " + e.message);
+    console.log("微信去广告脚本执行异常: " + e.message);
 }
 
 $done({ body });

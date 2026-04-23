@@ -1,6 +1,6 @@
 #!name=微信去广告
 #!desc=v1.0：净化微信朋友圈广告及公众号文章广告。需开启 MITM 并信任证书。基于 ykybl0027 逻辑。
-#!author=ykybl0001
+#!author=ykybl0027
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/WeChat.png
 
 [Rule]
@@ -11,9 +11,6 @@ DOMAIN, ads.mp.weixin.qq.com, REJECT
 DOMAIN, 720.qq.com, REJECT
 DOMAIN-SUFFIX, gdt.qq.com, REJECT
 DOMAIN-SUFFIX, l.qq.com, REJECT
-DOMAIN-SUFFIX, pgdt.gtimg.cn, REJECT
-DOMAIN-SUFFIX, pgdt.gtimg.com, REJECT
-DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
 
 [Rewrite]
 # 朋友圈广告素材拦截 (部分图片广告)
@@ -22,10 +19,10 @@ DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
 
 [Script]
 # 公众号文章广告拦截
-http-response ^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/wechat_ad.js, requires-body=true, timeout=10, tag=微信公众号广告净化
+http-response ^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/wechat_ad.js, requires-body=true, timeout=10, tag=微信公众号广告净化
 
 # 朋友圈信息流精准拦截 (需 MITM 对应域名)
-http-response ^https?:\/\/.*\.api\.wechat\.com\/cgi-bin\/micromsg-bin\/gettimeline script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/wechat_ad.js, requires-body=true, timeout=10, tag=微信朋友圈精准去广告
+http-response ^https?:\/\/.*\.api\.wechat\.com\/cgi-bin\/micromsg-bin\/gettimeline script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/wechat_ad.js, requires-body=true, timeout=10, tag=微信朋友圈精准去广告
 
 [MITM]
 hostname = mp.weixin.qq.com, *.api.wechat.com, ad.weixin.qq.com
