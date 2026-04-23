@@ -1,10 +1,11 @@
-#!name=QQ音乐净化 (v22 素材爆破版)
-#!desc=v22：基于 v19 成功环境，采用“放行接口、拦截素材”策略。放行所有业务配置以修复领时长报错，定向阻断开屏图片源。
-#!author=ykybl0022
+#!name=QQ音乐最终稳定版 (v23 领时长优先)
+#!desc=v23：回归最稳健的直连模式，确保“领时长”功能 100% 正常。放弃对广告域名的物理拦截，以换取极高的业务连通性。
+#!author=ykybl0023
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-# === 1. 业务逻辑接口 (必须 DIRECT + no-resolve 确保功能正常) ===
+# === 核心：DNS 逃逸与全域名放通 (确保功能 100% 正常) ===
+DOMAIN, httpdns.c.y.qq.com, DIRECT, no-resolve
 DOMAIN, szu6.y.qq.com, DIRECT, no-resolve
 DOMAIN, u.y.qq.com, DIRECT, no-resolve
 DOMAIN, c.y.qq.com, DIRECT, no-resolve
@@ -12,26 +13,20 @@ DOMAIN, tmead.y.qq.com, DIRECT, no-resolve
 DOMAIN, ad.tencentmusic.com, DIRECT, no-resolve
 DOMAIN, adstats.tencentmusic.com, DIRECT, no-resolve
 DOMAIN-SUFFIX, i2.y.qq.com, DIRECT, no-resolve
-
-# === 2. 激励视频接口 (必须放行) ===
 DOMAIN-SUFFIX, gdt.qq.com, DIRECT, no-resolve
+DOMAIN-SUFFIX, gdtimg.com, DIRECT, no-resolve
+DOMAIN-SUFFIX, gtimg.com, DIRECT, no-resolve
+DOMAIN-SUFFIX, gtimg.cn, DIRECT, no-resolve
 
-# === 3. 定向素材拦截 (尝试拦截图片素材而不干扰逻辑) ===
-# 拦截开屏与激励视频的“图片/视频素材”源
-DOMAIN, splashqqlive.gtimg.com, REJECT
-DOMAIN, adsmind.gdtimg.com, REJECT
-# 保持对通用广告追踪的拦截
-DOMAIN-SUFFIX, mdt.qq.com, REJECT
-
-# === 4. 系统补丁 ===
+# === 基础补丁 ===
 IP-CIDR, 119.29.29.29/32, DIRECT, no-resolve
 
 [Script]
-# v22 禁用脚本以防干扰业务逻辑
+# v23 不使用脚本，防止检测
 
 [Rewrite]
-# v22 禁用重写以防检测
+# v23 不使用重写，防止报错
 
 [MITM]
-# v22 彻底关闭解密，确保 App 环境检测通过
+# v23 彻底关闭解密
 hostname = 
