@@ -1,6 +1,6 @@
-#!name=QQ音乐(回滚版)
-#!desc=v27：回滚至 v13 版逻辑。基于前期抓包封杀 i2 弹窗源，恢复稳定的主接口净化。
-#!author=ykybl0027
+#!name=QQ音乐去广告
+#!desc=v1.0
+#!author=ykybl0001
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]

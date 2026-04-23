@@ -1,5 +1,5 @@
 #!name=微信去广告
-#!desc=v1.0：净化微信朋友圈广告及公众号文章广告。需开启 MITM 并信任证书。基于 ykybl0027 逻辑。
+#!desc=v1.0
 #!author=ykybl0001
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/WeChat.png
 
