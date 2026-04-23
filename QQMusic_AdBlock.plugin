@@ -1,10 +1,10 @@
-#!name=QQ音乐最终稳定版 (v23 领时长优先)
-#!desc=v23：回归最稳健的直连模式，确保“领时长”功能 100% 正常。放弃对广告域名的物理拦截，以换取极高的业务连通性。
-#!author=ykybl0023
+#!name=QQ音乐净化 (v24 素材劫持实验版)
+#!desc=v24：极限实验。放弃对业务主域的解密与拦截以确保功能，仅针对开屏图片 CDN (splashqqlive.gtimg.com) 进行劫持清理。
+#!author=ykybl0024
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
-# === 核心：DNS 逃逸与全域名放通 (确保功能 100% 正常) ===
+# === 1. 逻辑与业务接口 (绝对直连，无解密) ===
 DOMAIN, httpdns.c.y.qq.com, DIRECT, no-resolve
 DOMAIN, szu6.y.qq.com, DIRECT, no-resolve
 DOMAIN, u.y.qq.com, DIRECT, no-resolve
@@ -14,19 +14,19 @@ DOMAIN, ad.tencentmusic.com, DIRECT, no-resolve
 DOMAIN, adstats.tencentmusic.com, DIRECT, no-resolve
 DOMAIN-SUFFIX, i2.y.qq.com, DIRECT, no-resolve
 DOMAIN-SUFFIX, gdt.qq.com, DIRECT, no-resolve
-DOMAIN-SUFFIX, gdtimg.com, DIRECT, no-resolve
+
+# === 2. 素材域名 (保持直连，仅通过重写劫持内容) ===
 DOMAIN-SUFFIX, gtimg.com, DIRECT, no-resolve
 DOMAIN-SUFFIX, gtimg.cn, DIRECT, no-resolve
-
-# === 基础补丁 ===
-IP-CIDR, 119.29.29.29/32, DIRECT, no-resolve
-
-[Script]
-# v23 不使用脚本，防止检测
+DOMAIN-SUFFIX, gdtimg.com, DIRECT, no-resolve
 
 [Rewrite]
-# v23 不使用重写，防止报错
+# 仅针对开屏图片素材进行空图重定向
+^https?:\/\/splashqqlive\.gtimg\.com\/.* reject-img
+
+[Script]
+# v24 禁用业务脚本
 
 [MITM]
-# v23 彻底关闭解密
-hostname = 
+# 仅仅解密开屏素材域名，防止干扰业务检测
+hostname = splashqqlive.gtimg.com
