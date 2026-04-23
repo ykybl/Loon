@@ -1,6 +1,6 @@
 #!name=QQ音乐去广告
-#!desc=v13旗舰版：利用抓包数据定向封杀 H5 试听弹窗源 (i2.y.qq.com)，清理商业化营销节点。
-#!author=ykybl0013
+#!desc=v15最终版：解除激励域名强制阻断以支持“领时长”功能，通过脚本自动化模拟领取奖励，实现点击即领。
+#!author=ykybl0015
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Music.png
 
 [Rule]
@@ -10,25 +10,14 @@ IP-CIDR, 119.28.28.28/32, REJECT, no-resolve
 DOMAIN-KEYWORD, httpdns, REJECT
 DOMAIN-SUFFIX, httpdns.pro, REJECT
 
-# === 2. 定向阻断 H5 弹窗与营销页面 (v13 重点) ===
-# 封杀试听弹窗、会员升级弹窗源
-DOMAIN-SUFFIX, i2.y.qq.com, REJECT
-# 封杀商业化/营销素材
-DOMAIN-SUFFIX, mb.y.qq.com, REJECT
-DOMAIN-SUFFIX, sh.y.qq.com, REJECT
-# 封杀腾讯广告追踪
+# === 2. 激励与弹窗域名放行 (转由脚本精准诱捕) ===
+# v15 移除 i2.y.qq.com, mb.y.qq.com, tmead, adstats 的强制 REJECT
+# 允许请求进入脚本，由脚本返回“模拟成功”的奖励信号
+
+# 拦截腾讯通用广告追踪
 DOMAIN-SUFFIX, mdt.qq.com, REJECT
 
-# === 3. 腾讯专有广告域名 ===
-DOMAIN-SUFFIX, tmead.y.qq.com, REJECT
-DOMAIN-SUFFIX, tmeadbak.y.qq.com, REJECT
-DOMAIN-SUFFIX, tmeadcomm.y.qq.com, REJECT
-DOMAIN-SUFFIX, ad.tencentmusic.com, REJECT
-DOMAIN-SUFFIX, adstats.tencentmusic.com, REJECT
-DOMAIN-SUFFIX, tmeadquic.y.qq.com, REJECT
-
-# === 广点通及素材 ===
-DOMAIN-SUFFIX, gdt.qq.com, REJECT
+# 广点通素材（保持拦截，强制 App 使用本地或脚本伪装）
 DOMAIN-SUFFIX, adsmind.gdtimg.com, REJECT
 DOMAIN-SUFFIX, pgdt.gtimg.cn, REJECT
 DOMAIN-SUFFIX, pgdt.gtimg.com, REJECT
@@ -40,9 +29,10 @@ DOMAIN-SUFFIX, splashqqlive.gtimg.com, REJECT
 ^https?:\/\/splashqqlive\.gtimg\.com\/.* reject-img
 
 [Script]
-# 数据结构柔性处理
-http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐主接口精准解构
-http-response ^https?:\/\/.*tmead.*\.y\.qq\.com\/.* script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐广告接口伪装
+# v15 核心：接管所有广告接口实现自动化
+http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐全接口审计
+http-response ^https?:\/\/.*tmead.*\.y\.qq\.com\/.* script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐激励接口伪装
+http-response ^https?:\/\/adstats\.tencentmusic\.com\/.* script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐行为接口伪装
 
 [MITM]
 hostname = *tmead*.y.qq.com, adstats.tencentmusic.com, *adsmind*.gdtimg.com, *pgdt*.gtimg.com, *pgdt*.gtimg.cn, splashqqlive.gtimg.com, u.y.qq.com, c.y.qq.com, shc.y.qq.com, i2.y.qq.com
