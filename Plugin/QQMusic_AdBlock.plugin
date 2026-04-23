@@ -38,8 +38,8 @@ DOMAIN-SUFFIX, splashqqlive.gtimg.com, REJECT
 
 [Script]
 # 数据结构柔性处理
-http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐主接口精准解构
-http-response ^https?:\/\/.*tmead.*\.y\.qq\.com\/.* script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐广告接口伪装
+http-response ^https?:\/\/(u|c|shc)\.y\.qq\.com\/cgi-bin\/musicu\.fcg script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐主接口精准解构
+http-response ^https?:\/\/.*tmead.*\.y\.qq\.com\/.* script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qqmusic_ad.js, requires-body=true, timeout=10, tag=QQ音乐广告接口伪装
 
 [MITM]
 hostname = *tmead*.y.qq.com, adstats.tencentmusic.com, *adsmind*.gdtimg.com, *pgdt*.gtimg.com, *pgdt*.gtimg.cn, splashqqlive.gtimg.com, u.y.qq.com, c.y.qq.com, shc.y.qq.com, i2.y.qq.com
