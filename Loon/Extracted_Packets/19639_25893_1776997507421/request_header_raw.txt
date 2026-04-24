@@ -1,0 +1,14 @@
+:scheme: https
+:path: /fmz200/wool_scripts/raw/main/Loon/plugin/blockAds.plugin
+:authority: github.com
+:method: GET
+cookie: _gh_sess=8YOiSrIMfRMoG5aHLZx4V0TmyKFEKDXobSvn3Pb6KGe1LKBv%2FvkN%2F5Zt2AXbpec%2BFKW%2BJNaZY5jOblRSsVZBVVikiEBIr2jnRVmVNfs%2B7IFptGZ4Fx1dqYlvWhIK%2FgeLyBhtEsFCfT2xp%2FzsPFyqtpnH%2BjvEsYK7Iw9vbhk0A24XjAHkYgYGo8F0oYtmDZj915sqRbkx%2BHOlafRE4qEI8Oe2vqzS38jmMRwAVaNjMWMri94Z3ddYqXAZGLaX7KXqa%2BrqaLA12rZsUn0V7QyJmA%3D%3D--RB%2FASf5ePJ2So2ga--otQgFZhcpBBNtPYtzE%2ByNQ%3D%3D
+cookie: _octo=GH1.1.1858256730.1771668139
+cookie: logged_in=no
+accept: */*
+if-none-match: W/"dhrrulprfbxmsvd-zstd"
+user-agent: Loon/945 CFNetwork/3860.500.112 Darwin/25.4.0
+priority: u=3
+accept-language: zh-CN,zh-Hans;q=0.9
+accept-encoding: gzip, deflate, br
+

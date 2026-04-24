@@ -1,0 +1,11 @@
+:scheme: https
+:path: /kelv1n1n/script/refs/heads/main/js/goofish.js?token=209863
+:authority: klraw.pages.dev
+:method: GET
+accept: */*
+if-none-match: W/"0752f2ce2dcba87bb594e92e3e6a7b27f4e7aaa99efca8a53f196b88384636d8"
+user-agent: Loon/945 CFNetwork/3860.500.112 Darwin/25.4.0
+priority: u=3
+accept-language: zh-CN,zh-Hans;q=0.9
+accept-encoding: gzip, deflate, br
+

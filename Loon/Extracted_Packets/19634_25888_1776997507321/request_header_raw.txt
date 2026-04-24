@@ -1,0 +1,11 @@
+:scheme: https
+:path: /scripts/redbook.ads.js
+:authority: royal-block-f6b1.q00.workers.dev
+:method: GET
+accept: */*
+if-none-match: W/"4af91cf2e57b35dcaba9a8ec424ad6c6"
+user-agent: Loon/945 CFNetwork/3860.500.112 Darwin/25.4.0
+priority: u=3
+accept-language: zh-CN,zh-Hans;q=0.9
+accept-encoding: gzip, deflate, br
+

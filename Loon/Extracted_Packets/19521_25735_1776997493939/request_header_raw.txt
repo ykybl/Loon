@@ -1,0 +1,11 @@
+:scheme: https
+:path: /ddgksf2013/Scripts/master/baishitv.js
+:authority: raw.githubusercontent.com
+:method: GET
+accept: */*
+if-none-match: W/"dhrrulprfbxmsvd-zstd"
+user-agent: Loon/945 CFNetwork/3860.500.112 Darwin/25.4.0
+priority: u=3
+accept-language: zh-CN,zh-Hans;q=0.9
+accept-encoding: gzip, deflate, br
+

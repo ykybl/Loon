@@ -1,0 +1,11 @@
+:scheme: https
+:path: /zirawell/R-Store/main/Res/Scripts/AntiAd/51job.js
+:authority: hub.incept.pw
+:method: GET
+accept: */*
+if-none-match: W/"dhrrulprfbxmsvd-zstd"
+user-agent: Loon/945 CFNetwork/3860.500.112 Darwin/25.4.0
+priority: u=3
+accept-encoding: gzip, deflate, br
+accept-language: zh-CN,zh-Hans;q=0.9
+

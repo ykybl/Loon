@@ -1,17 +1,21 @@
 #!name=微信去广告
-#!desc=v1.1：终极净化版。结合墨鱼 (ddgksf2013)、BlackMatrix7 等社区精华逻辑。屏蔽朋友圈、公众号、视频号植入广告。
+#!desc=v1.2：终极增强版。集成了 RuCu6, ld2j, VirgilClyne 等大佬的精华逻辑，强化朋友圈、公众号、视频号及小程序广告过滤，新增外部链接直接跳转功能。
 #!author=ykybl0001
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/WeChat.png
 
 [Rule]
-# === 1. 微信原生广告域名 ===
+# === 1. 朋友圈及原生广告域名强杀 ===
 DOMAIN, ad.weixin.qq.com, REJECT
 DOMAIN, v.ad.weixin.qq.com, REJECT
 DOMAIN, ads.mp.weixin.qq.com, REJECT
 DOMAIN, ads.vp.weixin.qq.com, REJECT
 DOMAIN, 720.qq.com, REJECT
+DOMAIN, wxsnsdy.wxs.qq.com, REJECT
+DOMAIN, wxsmsdy.video.qq.com, REJECT
+DOMAIN, wxsnsdythumb.wxs.qq.com, REJECT
+DOMAIN-SUFFIX, wxs.qq.com, REJECT
 
-# === 2. 腾讯广点通及 CDN 拦截 ===
+# === 2. 腾讯广点通及素材拦截 ===
 DOMAIN-SUFFIX, gdt.qq.com, REJECT
 DOMAIN-SUFFIX, l.qq.com, REJECT
 DOMAIN-SUFFIX, pgdt.gtimg.cn, REJECT
@@ -21,22 +25,34 @@ DOMAIN-SUFFIX, v.gdtimg.com, REJECT
 DOMAIN-SUFFIX, qzonestyle.gtimg.cn, REJECT
 DOMAIN, splashqqlive.gtimg.com, REJECT
 
-# === 3. 统计与追踪拦截 ===
+# === 3. 统计、监控与追踪拦截 ===
 DOMAIN, btrace.qq.com, REJECT
 DOMAIN, beacon.qq.com, REJECT
 DOMAIN, monitor.music.qq.com, REJECT
+
+# === 4. 小程序通用广告屏蔽 (可选) ===
+DOMAIN, ads-shopping.shouqianba.com, REJECT
+DOMAIN, ad.maoyan.com, REJECT
+DOMAIN, e.jparking.cn, REJECT
 
 [Rewrite]
 # 广告素材深度拦截
 ^https?:\/\/.*adsmind.*\.gdtimg\.com\/.* reject-img
 ^https?:\/\/.*pgdt.*\.gtimg\.(com|cn)\/.* reject-img
+# 朋友圈/视频号广告下载拦截
+^http:\/\/\w+\.wxs\.qq\.com\/\d+\/\d+\/(snscosdownload|snssvpdownload)\/(SH|SZ)\/reserved\/\w+ - reject-dict
+# 公众号文章辅助净化
+^https:\/\/mp\.weixin\.qq\.com\/mp\/(cps_product_info|getappmsgad|jsmonitor|masonryfeed|relatedarticle)\? - reject-dict
 
 [Script]
-# 公众号文章广告拦截
+# 公众号文章广告拦截 (主脚本)
 http-response ^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/wechat_ad.js, requires-body=true, timeout=10, tag=微信公众号广告净化
 
-# 朋友圈信息流精准拦截 (覆盖多地服务器)
-http-response ^https?:\/\/.*\.api\.wechat\.com\/cgi-bin\/micromsg-bin\/get(timeline|snsline) script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/wechat_ad.js, requires-body=true, timeout=10, tag=微信朋友圈终极去广告
+# 朋友圈信息流精准拦截 (需解密 api.wechat.com)
+http-response ^https?:\/\/.*\.api\.wechat\.com\/cgi-bin\/micromsg-bin\/get(timeline|snsline) script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/wechat_ad.js, requires-body=true, timeout=10, tag=微信朋友圈精准去广告
+
+# 微信外部链接解锁 (引用社区成熟脚本)
+http-response ^https\:\/\/(weixin110\.qq|security.wechat)\.com\/cgi-bin\/mmspamsupport-bin\/newredirectconfirmcgi\? script-path = https://ghproxy.net/https://raw.githubusercontent.com/keleeone/Resource/main/Script/Weixin/Weixin_external_links_unlock.js, requires-body = true, tag = 微信外部链接解锁
 
 [MITM]
-hostname = mp.weixin.qq.com, *.api.wechat.com, ad.weixin.qq.com, ads.mp.weixin.qq.com
+hostname = mp.weixin.qq.com, *.api.wechat.com, ad.weixin.qq.com, ads.mp.weixin.qq.com, weixin110.qq.com, security.wechat.com

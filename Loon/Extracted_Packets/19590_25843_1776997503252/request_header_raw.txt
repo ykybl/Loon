@@ -1,0 +1,10 @@
+POST /mmtls/3825142c HTTP/1.1
+Accept: */*
+Cache-Control: no-cache
+Connection: Keep-Alive
+Content-Length: 1771
+Content-Type: application/octet-stream
+Host: szextshort.weixin.qq.com
+Upgrade: mmtls
+User-Agent: MicroMessenger Client
+
