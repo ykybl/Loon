@@ -1,6 +1,6 @@
 /**
  * 钱迹本地 VIP 解锁脚本 - 适配 v4.4.3+ 
- * 作者：Antigravity_V1.2
+ * 作者：ykybl0002
  */
 let body = $response.body;
 
@@ -68,7 +68,7 @@ if (body) {
         deepUnlock(obj);
         
         body = JSON.stringify(obj);
-        console.log("钱迹本地 VIP 解锁成功 (Antigravity_V1.2)！");
+        console.log("钱迹本地 VIP 解锁成功 (ykybl0002)！");
     } catch (e) {
         console.log("钱迹本地 VIP 解锁脚本执行失败: " + e);
     }
