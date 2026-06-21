@@ -6,6 +6,7 @@
 [Script]
 # 拦截 VIP 配置接口及用户信息接口，重写响应体
 http-response ^https:\/\/(api\.qianjiapp\.com|qianji\.xxoojoke\.com)\/(vip\/config|vip\/configios|v1\/user\/info) script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_vip.js, requires-body=true, timeout=10, tag=钱迹会员解锁
+http-request ^https:\/\/api\.qianjiapp\.com\/emmav2\/ocr2bill script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_ocr_hijack.js, requires-body=true, timeout=10, tag=钱迹官方自动记账OCR劫持
 
 [MITM]
 hostname = api.qianjiapp.com, qianji.xxoojoke.com
