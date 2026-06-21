@@ -21,6 +21,10 @@
 - **功能**: 拦截开屏广告、屏蔽主接口弹窗及营销页面、净化主接口数据结构。
 - **配置**: [QQMusic_AdBlock.plugin](https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/QQMusic_AdBlock.plugin)
 
+### 3. 钱迹本地会员解锁 (qianji_vip)
+- **功能**: 解锁本地钱迹会员权限（支持 v4.4.3+ ），配合 iOS 原生快捷指令可以实现全自动、免跳转的无感记账。
+- **配置**: [qianji_vip.plugin](https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_vip.plugin)
+
 ## 如何使用
 
 1. 打开 Loon App。
@@ -29,6 +33,7 @@
 4. 输入对应插件的 Raw 代理链接（建议复制下方链接）：
    - 微信: `https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/WeChat_AdBlock.plugin`
    - QQ音乐: `https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/QQMusic_AdBlock.plugin`
+   - 钱迹会员解锁: `https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_vip.plugin`
 5. 开启插件，并确保 MITM 主机名中已包含插件所需的域名。
 
 ## 免责声明
