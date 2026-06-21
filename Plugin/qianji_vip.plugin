@@ -1,0 +1,11 @@
+#!name=钱迹本地会员解锁
+#!desc=解锁钱迹本地 VIP 权限，以启用自动记账等本地会员功能
+#!author=ykybl0001
+#!icon=https://raw.githubusercontent.com/deezertidal/private/main/icons/qj.png
+
+[Script]
+# 拦截 VIP 配置接口及用户信息接口，重写响应体
+http-response ^https:\/\/(api\.qianjiapp\.com|qianji\.xxoojoke\.com)\/(vip\/config|vip\/configios|v1\/user\/info) script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_vip.js, requires-body=true, timeout=10, tag=钱迹会员解锁
+
+[MITM]
+hostname = api.qianjiapp.com, qianji.xxoojoke.com
