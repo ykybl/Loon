@@ -1,0 +1,26 @@
+#!name=菜鸟去广告净化
+#!desc=拦截菜鸟APP内开屏、物流详情、列表等原生广告及第三方广告联盟请求
+#!author=ykybl0003
+#!homepage=
+#!icon=
+
+[Rule]
+# 拦截第三方广告联盟 (广点通、穿山甲、秒针等)
+DOMAIN-SUFFIX, gdt.qq.com, REJECT
+DOMAIN-SUFFIX, ad.toutiao.com, REJECT
+DOMAIN-SUFFIX, pangolin.snssdk.com, REJECT
+DOMAIN-SUFFIX, pstatp.com, REJECT
+DOMAIN-SUFFIX, miaozhen.com, REJECT
+DOMAIN-SUFFIX, adx.taobao.com, REJECT
+DOMAIN-KEYWORD, msad, REJECT
+
+[URL Rewrite]
+# 拦截菜鸟 MTOP API 广告请求 (通过 URL 参数匹配)
+# 涵盖 mtop.cainiao.nbnetflow.guoappstartup.ads.show (开屏广告)
+# 涵盖 mtop.cainiao.nbnetflow.logistics.ads.show (物流详情广告)
+# 涵盖 mtop.cainiao.nbnetflow.cabt.ads.show (驿站/提货页广告)
+# 以及相关的批量曝光 mshow 接口
+^https?:\/\/(guide-)?acs\.m\.taobao\.com\/gw\/mtop\.cainiao\.nbnetflow\..*\.ads\.(m?)show\/ - reject
+
+[MitM]
+hostname = acs.m.taobao.com, guide-acs.m.taobao.com
