@@ -1,6 +1,6 @@
 #!name=菜鸟去广告净化
 #!desc=拦截菜鸟APP内开屏、物流详情、列表等原生广告及第三方广告联盟请求
-#!author=ykybl0005
+#!author=ykybl0006
 #!homepage=
 #!icon=
 
@@ -8,7 +8,14 @@
 # 强制拦截 HTTPDNS，防止应用直接通过 IP 绕过 MitM 规则
 DOMAIN, amdc.m.taobao.com, REJECT
 DOMAIN, amdc.alipay.com, REJECT
+DOMAIN, amdc.wapa.taobao.com, REJECT
+DOMAIN-SUFFIX, amdc.taobao.com, REJECT
+DOMAIN-SUFFIX, amdc.alipay.com, REJECT
 DOMAIN, httpdns.alicdn.com, REJECT
+
+# 强制阻断 SPDY/QUIC 等私有加密通道，迫使 MTOP 降级到标准 HTTPS 被 MitM 拦截
+DOMAIN, guide-acs.m.taobao.com, REJECT
+DOMAIN, mtop.cainiao.com, REJECT
 
 # 拦截第三方广告联盟 (广点通、穿山甲、秒针等变种域名)
 DOMAIN-SUFFIX, gdt.qq.com, REJECT

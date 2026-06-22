@@ -12,12 +12,12 @@ try {
                     let type = (item.type || item.componentType || item.moduleType || item.cardType || "").toLowerCase();
                     let title = (item.title || item.name || item.text || item.bizId || "").toLowerCase();
                     
-                    let isAd = item.isAd || item.adInfo || item.ad_id || item.hasAd;
+                    let isAd = item.isAd || item.adInfo || item.ad_id || item.hasAd || title.includes("广告");
                     let isMall = type.includes("mall") || title.includes("商城") || title.includes("买买") || title.includes("特卖") || title.includes("优惠");
-                    let isBanner = type.includes("banner") || type.includes("promotion") || type.includes("ad_") || type.includes("splash");
+                    let isBanner = type.includes("banner") || type.includes("promotion") || type.includes("ad_") || type.includes("splash") || title.includes("直接送");
                     
-                    // 额外清理可能嵌入的推荐流
-                    let isFeed = type.includes("feed") && (title.includes("推荐") || title.includes("发现"));
+                    // 额外清理可能嵌入的推荐流，包括一些常见的推流商品特征
+                    let isFeed = (type.includes("feed") || type.includes("recommend")) && (title.includes("推荐") || title.includes("发现") || title.includes("推流"));
 
                     if (isAd || isMall || isBanner || isFeed) {
                         console.log("Cainiao AdBlock - Removed Node: " + (title || type));
