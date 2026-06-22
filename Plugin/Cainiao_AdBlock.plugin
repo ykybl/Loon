@@ -1,6 +1,6 @@
 #!name=菜鸟去广告净化
 #!desc=拦截菜鸟APP内开屏、物流详情、列表等原生广告及第三方广告联盟请求
-#!author=ykybl0006
+#!author=ykybl0007
 #!homepage=
 #!icon=
 
@@ -46,5 +46,6 @@ DOMAIN, admonitor-feedback.cn-hangzhou.log.aliyuncs.com, REJECT
 http-response ^https?:\/\/(guide-)?acs\.m\.taobao\.com\/gw\/mtop\.cainiao\.(guoguo\.home|nbpresentation\.protocol|app\.mine|nbnetflow) requires-body=1, max-size=0, script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/Cainiao_AdBlock.js, tag=菜鸟深层去商城及广告
 
 [MitM]
-hostname = acs.m.taobao.com, guide-acs.m.taobao.com
+hostname = acs.m.taobao.com, guide-acs.m.taobao.com, mtop.cainiao.com, *.cainiao.com, *.m.taobao.com
+
 
