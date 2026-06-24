@@ -1,6 +1,6 @@
 /**
  * 钱迹本地 VIP 解锁脚本 - 适配 v5.5.5+
- * 作者：ykybl0005
+ * 作者：ykybl0006
  *
  * v4 修复：
  *  - 针对不同接口返回定制化的假成功响应，而非统一的空 data{}
@@ -51,9 +51,19 @@ if (body) {
                 if (url.includes("/syncv2/pull")) {
                     fakeBody = JSON.stringify({ ec: 0, em: "ok", data: { list: [], hasmore: 0, lasttime: Math.floor(Date.now() / 1000) } });
                 }
-                // 账单上传同步接口：返回"同步成功"的合法成功体
+                // 账单上传同步接口：提取请求中的 ID 构造同步成功体
                 else if (url.includes("/bill/syncall")) {
-                    fakeBody = JSON.stringify({ ec: 0, em: "ok", data: { successids: [], failids: [] } });
+                    let sIds = [];
+                    try {
+                        let rBody = $request.body;
+                        if (rBody) {
+                            let m = rBody.match(/%22id%22%3A(\d+)/g) || rBody.match(/"id":(\d+)/g);
+                            if (m) {
+                                sIds = m.map(x => parseInt(x.match(/\d+/)[0]));
+                            }
+                        }
+                    } catch(e) {}
+                    fakeBody = JSON.stringify({ ec: 0, em: "ok", data: { successids: sIds, failids: [] } });
                 }
                 // 标签/分类同步接口
                 else if (url.includes("/tag/syncall") || url.includes("/category/syncall")) {
