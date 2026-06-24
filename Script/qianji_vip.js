@@ -17,11 +17,19 @@ if (body) {
 
         // ======================================================
         // 核心安全防护：主动拦截可能导致封号的"云端 VIP 功能"请求
-        // 如果用户尝试上传图片等需要云端 VIP 权限的操作，直接拦截并伪装成功
-        // 从而保护账号不被服务端风控系统拉黑
+        // 如果用户尝试上传图片、使用多账本、预算等云端 VIP 权限操作，
+        // 直接拦截并伪装成功，从而保护账号不被服务端风控系统拉黑
         // ======================================================
-        if (url.includes("/bill/upload_image") || url.includes("/billimg/") || url.includes("/billimg")) {
-            console.log("钱迹：检测到高危 VIP 云端请求（上传附件），已主动拦截以防封号！(ykybl0004)");
+        const dangerousPaths = [
+            "/bill/upload_image", "/billimg", // 图片附件
+            "/book/add", "/book/update", "/book/share", "/book/invite", // 多账本与共享
+            "/budget/", "/budget", // 预算设置
+            "/repeat", "/repeattask", "/installment", // 周期记账与分期
+            "/export" // 导出功能
+        ];
+
+        if (dangerousPaths.some(p => url.includes(p))) {
+            console.log("钱迹：检测到高危 VIP 云端请求 (" + url.split("/").slice(-2).join("/") + ")，已主动拦截以防封号！(ykybl0004)");
             $done({ body: JSON.stringify({ ec: 0, em: "ok", data: {} }) });
             return;
         }
