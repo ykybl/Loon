@@ -1,6 +1,6 @@
 /**
  * 钱迹本地 VIP 解锁脚本 - 适配 v5.5.5+
- * 作者：ykybl0004
+ * 作者：ykybl0005
  *
  * v4 修复：
  *  - 针对不同接口返回定制化的假成功响应，而非统一的空 data{}
@@ -29,7 +29,7 @@ if (body) {
         ];
 
         if (dangerousPaths.some(p => url.includes(p))) {
-            console.log("钱迹：检测到高危 VIP 云端请求 (" + url.split("/").slice(-2).join("/") + ")，已主动拦截以防封号！(ykybl0004)");
+            console.log("钱迹：检测到高危 VIP 云端请求 (" + url.split("/").slice(-2).join("/") + ")，已主动拦截以防封号！(ykybl0005)");
             $done({ body: JSON.stringify({ ec: 0, em: "ok", data: {} }) });
             return;
         }
@@ -85,7 +85,7 @@ if (body) {
                     fakeBody = JSON.stringify({ ec: 0, em: "ok", data: {} });
                 }
 
-                console.log("钱迹：code=40009 拦截 [" + url.split("/").slice(-2).join("/") + "] (ykybl0004)");
+                console.log("钱迹：code=40009 拦截 [" + url.split("/").slice(-2).join("/") + "] (ykybl0005)");
                 $done({ body: fakeBody });
                 return;
             }
@@ -124,7 +124,7 @@ if (body) {
 
         deepUnlock(obj);
         body = JSON.stringify(obj);
-        console.log("钱迹 VIP 解锁成功 (ykybl0004)");
+        console.log("钱迹 VIP 解锁成功 (ykybl0005)");
     } catch (e) {
         console.log("钱迹 VIP 脚本异常: " + e);
     }

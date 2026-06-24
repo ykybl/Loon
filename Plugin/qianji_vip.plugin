@@ -1,13 +1,13 @@
 #!name=钱迹本地会员解锁
 #!desc=解锁钱迹本地 VIP 权限，并修复"账号异常"弹窗 (ec=8888/code=40009)
-#!author=ykybl0004
+#!author=ykybl0005
 #!icon=https://raw.githubusercontent.com/deezertidal/private/main/icons/qj.png
 
 [Script]
 # 拦截所有 api.qianjiapp.com 及备用域名的接口响应
 # 作用1：修复 ec=8888/code=40009 账号异常弹窗
 # 作用2：解锁 VIP 状态字段
-http-response ^https:\/\/(api\.qianjiapp\.com|qianji\.xxoojoke\.com)\/ script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_vip.js?v=0004, requires-body=true, timeout=10, tag=钱迹会员解锁+账号异常修复
+http-response ^https:\/\/(api\.qianjiapp\.com|qianji\.xxoojoke\.com)\/ script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_vip.js?v=0005, requires-body=true, timeout=10, tag=钱迹会员解锁+账号异常修复
 
 [MITM]
 hostname = api.qianjiapp.com, qianji.xxoojoke.com
