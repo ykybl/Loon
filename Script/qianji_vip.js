@@ -67,15 +67,12 @@ if (body) {
         }
         
         // ======================================================
-        // 精准放行数据同步接口，避免 JS JSON.parse() 丢失 64位长整型 ID 精度！
-        // 如果是同步接口且正常（非8888），直接原样返回，不进行深度解锁
+        // 白名单机制：只有明确需要修改 VIP 状态的接口，才进行 JSON 解析和伪造
         // ======================================================
-        if (url.includes("/bill/") || url.includes("/syncv2/") || url.includes("/tag/") || url.includes("/category/") || url.includes("/auto/")) {
-            $done({ body });
-            return;
-        }
+        const targetUrls = ["/vip/config", "/vip/configios", "/v1/user/info", "/active/home", "/client/init"];
+        let shouldUnlock = targetUrls.some(p => url.includes(p));
 
-        if (obj) {
+        if (shouldUnlock && obj) {
             const deepUnlock = (target) => {
                 if (typeof target !== 'object' || target === null) return;
                 const keys = Object.keys(target);
@@ -83,6 +80,8 @@ if (body) {
                     const lk = key.toLowerCase();
                     if (lk === 'isvip' || lk === 'is_vip' || lk === 'vip') {
                         if (typeof target[key] === 'boolean' || typeof target[key] === 'number') target[key] = true;
+                    } else if (lk === 'viptype' || lk === 'vip_type') {
+                        target[key] = 100;
                     } else if (lk === 'vipend' || lk === 'vip_end') {
                         target[key] = 4092599349;
                     } else if (lk === 'vipstart' || lk === 'vip_start') {
@@ -98,12 +97,12 @@ if (body) {
 
             if (obj.data && obj.data.config) {
                 if (!obj.data.config.userinfo) obj.data.config.userinfo = {};
-                Object.assign(obj.data.config.userinfo, { vipend: 4092599349, vipstart: 1666666666 });
+                Object.assign(obj.data.config.userinfo, { vipend: 4092599349, vipstart: 1666666666, viptype: 100 });
             }
 
             deepUnlock(obj);
             body = JSON.stringify(obj);
-            console.log("钱迹 VIP 解锁成功 (ykybl0010)");
+            console.log("钱迹 VIP 解锁成功 (ykybl0011)");
         }
         
         $done({ body });
