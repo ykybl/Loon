@@ -92,7 +92,8 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
     const aiApiUrl = "https://qianji.renflyp.dpdns.org/parse";
     const cfRequest = {
         url: aiApiUrl,
-        timeout: 60, // 强制 60 秒超时，因为硅基流动大模型有时需要 10-15 秒生成时间
+        timeout: 60, // 强制 60 秒超时
+        node: "DIRECT", // 强制直连，防止被节点代理卡死
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             text: sourceText,
