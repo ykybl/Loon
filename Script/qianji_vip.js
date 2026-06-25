@@ -37,7 +37,7 @@ if (body) {
                 isBlocked = true;
             }
 
-            if (isBlocked) {
+            if (isBlocked || obj.ec === 8888) {
                 let fakeBody = JSON.stringify({ ec: 0, em: "ok", data: {} });
                 
                 if (url.includes("/syncv2/pull")) {
@@ -51,9 +51,28 @@ if (body) {
                         }
                     } catch(e) {}
                     fakeBody = JSON.stringify({ ec: 0, em: "ok", data: { successids: sIds, failids: [] } });
+                } else if (url.includes("/user/profile") || url.includes("/vip/config") || url.includes("/user/info")) {
+                    // 为被封号的用户强制返回一个完美的 VIP 身份，避免个人资料页空白和 AI 功能锁死
+                    const fakeUser = {
+                        nickname: "超级VIP(防封版)",
+                        vipend: 4092599349,
+                        vipstart: 1666666666,
+                        viptype: 100,
+                        isvip: true,
+                        email: "2801306727@qq.com",
+                        uid: 999999
+                    };
+                    fakeBody = JSON.stringify({ 
+                        ec: 0, 
+                        em: "ok", 
+                        data: { config: { userinfo: fakeUser }, userinfo: fakeUser, isvip: true } 
+                    });
+                } else if (url.includes("/bill/upload_image") || url.includes("/billimg")) {
+                    // 伪造上传成功，以便让后续的 AI 流程能够拿到一个虚假的图片 URL 继续走下去
+                    fakeBody = JSON.stringify({ ec: 0, em: "ok", data: { url: "https://qianji.renflyp.dpdns.org/dummy.jpg" } });
                 }
 
-                console.log("钱迹：已成功拦截并放行 40009 弹窗！(ykybl0017)");
+                console.log("钱迹：已成功拦截 8888 封号状态，并为其注入了完美的伪造数据！(ykybl0018)");
                 $done({ body: fakeBody });
                 return;
             }
