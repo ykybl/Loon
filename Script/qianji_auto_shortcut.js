@@ -103,8 +103,8 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
 
     $httpClient.post(cfRequest, function(err, resp, data) {
         if (err || !data) {
-            console.log("调用云端解析失败：" + err);
-            $done({ response: { status: 500, body: JSON.stringify({ error: "调用 CF 云端大模型失败" }) } });
+            console.log("调用云端解析失败：" + JSON.stringify(err || "无数据返回"));
+            $done({ response: { status: 500, body: JSON.stringify({ error: "调用 CF 云端大模型失败: " + JSON.stringify(err || "No data") }) } });
             return;
         }
 
