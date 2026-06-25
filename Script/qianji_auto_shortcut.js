@@ -3,7 +3,7 @@
  * 作用：绕过本地快捷指令的 VIP 限制与异常弹窗死锁。
  * 原理：拦截自定义本地请求，调用 CF 云端大模型，然后使用保存的官方 Token 直接向钱迹服务器静默写入账单！
  * 
- * 作者：ykybl0026
+ * 作者：ykybl0027
  */
 
 const url = ($request && $request.url) ? $request.url : "";
@@ -93,7 +93,7 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
     const cfRequest = {
         url: aiApiUrl,
         timeout: 60, // 强制 60 秒超时
-        node: "DIRECT", // 强制直连，防止被节点代理卡死
+        // node: "DIRECT", // 注释掉：Loon 中直接指定 node 可能导致底层请求建立失败 (HTTPClient request failed (null))
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             text: sourceText,
