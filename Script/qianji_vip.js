@@ -1,6 +1,6 @@
 /**
  * 钱迹本地 VIP 解锁脚本 - 适配 v5.5.5+
- * 作者：ykybl0017
+ * 作者：ykybl0036
  */
 let body = $response.body;
 let url = ($request && $request.url) ? $request.url : "";

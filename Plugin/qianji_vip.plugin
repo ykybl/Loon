@@ -1,6 +1,6 @@
 #!name=钱迹本地会员解锁
 #!desc=解锁钱迹本地 VIP 权限，修复"账号异常"弹窗，并支持 AI 识别劫持
-#!author=ykybl0017
+#!author=ykybl0036
 #!icon=https://raw.githubusercontent.com/deezertidal/private/main/icons/qj.png
 
 [Script]
