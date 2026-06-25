@@ -81,7 +81,7 @@ if (body) {
                     if (lk === 'isvip' || lk === 'is_vip' || lk === 'vip') {
                         if (typeof target[key] === 'boolean' || typeof target[key] === 'number') target[key] = true;
                     } else if (lk === 'viptype' || lk === 'vip_type') {
-                        target[key] = 0; // 强制设为 0，让 App 生成正确的 tok 签名！
+                        target[key] = 100; // 必须恢复为 100，否则快捷指令本地校验不通过
                     } else if (lk === 'vipend' || lk === 'vip_end') {
                         target[key] = 4092599349;
                     } else if (lk === 'vipstart' || lk === 'vip_start') {
@@ -97,12 +97,12 @@ if (body) {
 
             if (obj.data && obj.data.config) {
                 if (!obj.data.config.userinfo) obj.data.config.userinfo = {};
-                Object.assign(obj.data.config.userinfo, { vipend: 4092599349, vipstart: 1666666666, viptype: 0 }); // 强制 0
+                Object.assign(obj.data.config.userinfo, { vipend: 4092599349, vipstart: 1666666666, viptype: 100 });
             }
 
             deepUnlock(obj);
             body = JSON.stringify(obj);
-            console.log("钱迹 VIP 解锁成功 (ykybl0012)");
+            console.log("钱迹 VIP 解锁成功 (ykybl0013)");
         }
         
         $done({ body });
