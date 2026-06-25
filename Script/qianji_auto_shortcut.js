@@ -109,8 +109,8 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
 
         // 3. 构造原生写入请求推送到钱迹官方云端
         const timestampSeconds = Math.floor(Date.now() / 1000);
-        // 生成虚假唯一 ID：17 + 当前毫秒 + 4位随机
-        const fakeBillId = "17" + Date.now().toString() + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        // 生成虚假唯一 ID：使用纯数字
+        const fakeBillId = Number("17" + Date.now().toString() + Math.floor(Math.random() * 100).toString().padStart(2, '0'));
 
         // 查找真实 ID
         let realAssetId = 0;
@@ -165,6 +165,9 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
         // 覆盖一些可能导致校验失败的 Headers
         if (pushReq.headers["Content-Length"]) delete pushReq.headers["Content-Length"];
         if (pushReq.headers["content-length"]) delete pushReq.headers["content-length"];
+        if (pushReq.headers["Content-Type"]) delete pushReq.headers["Content-Type"];
+        if (pushReq.headers["content-type"]) delete pushReq.headers["content-type"];
+        pushReq.headers["Content-Type"] = "application/json; charset=utf-8";
 
         $httpClient.post(pushReq, function(pushErr, pushResp, pushData) {
             if (pushErr) {
