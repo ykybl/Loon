@@ -3,7 +3,7 @@
  * 作用：绕过本地快捷指令的 VIP 限制与异常弹窗死锁。
  * 原理：拦截自定义本地请求，调用 CF 云端大模型，然后使用保存的官方 Token 直接向钱迹服务器静默写入账单！
  * 
- * 作者：ykybl0019
+ * 作者：ykybl0021
  */
 
 const url = ($request && $request.url) ? $request.url : "";
@@ -11,7 +11,7 @@ const url = ($request && $request.url) ? $request.url : "";
 // ==========================================
 // 模块 1：被动抓取并更新身份凭据（运行在钱迹 App 内时）
 // ==========================================
-if (url.includes("api.qianjiapp.com")) {
+if (url.includes("api.qianjiapp.com") && !url.includes("api.qianjiapp.com/hijack_add_bill")) {
     if (url.includes("/category/list") || url.includes("/asset/list") || url.includes("/syncv2/pull")) {
         // 保存全量请求头（包含授权信息）
         $persistentStore.write(JSON.stringify($request.headers), "qianji_auth_headers");
