@@ -17,5 +17,5 @@ http-request ^https:\/\/api\.qianjiapp\.com\/hijack_add_bill script-path=https:/
 hostname = api.qianjiapp.com
 
 [Rule]
-# 强制让 Cloudflare 绑定的自建域名走代理节点，避免 DNS 污染或请求阻断导致的 Request timeout
-DOMAIN-SUFFIX,qianji.renflyp.dpdns.org,PROXY
+# 强制让 Cloudflare 绑定的自建域名直连，排除因为科学上网代理节点不稳定导致的 POST 请求被阻断超时
+DOMAIN-SUFFIX,qianji.renflyp.dpdns.org,DIRECT
