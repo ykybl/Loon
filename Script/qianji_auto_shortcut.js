@@ -99,8 +99,8 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
         },
         body: JSON.stringify({
             text: sourceText,
-            assets: [], // 【极端测试】传空数组，看是否是因为体积过大致 CF Worker 崩溃
-            categories: [] // 【极端测试】传空数组，看是否是因为体积过大致 CF Worker 崩溃
+            assets: formattedAssets,
+            categories: formattedCategories
         })
     };
 
@@ -123,8 +123,8 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
 
         // 3. 构造原生写入请求推送到钱迹官方云端
         const timestampSeconds = Math.floor(Date.now() / 1000);
-        // 生成虚假唯一 ID：使用纯数字
-        const fakeBillId = Number("17" + Date.now().toString() + Math.floor(Math.random() * 100).toString().padStart(2, '0'));
+        // 生成虚假唯一 ID：缩短到 15 位以内，防止 JS Number 最大精度丢失引发服务端无法识别被拒
+        const fakeBillId = Number(Date.now().toString() + Math.floor(Math.random() * 99).toString().padStart(2, '0'));
 
         // 查找真实 ID
         let realAssetId = 0;
@@ -150,13 +150,13 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
             data: [
                 {
                     id: fakeBillId,
-                    type: parsedData.billType.value === "income" ? 1 : 0,
+                    type: parsedData.billType && parsedData.billType.value === "income" ? 1 : 0,
                     money: parseFloat(parsedData.amount) || 0,
                     remark: parsedData.remark || "快捷指令自动记账",
                     createtime: timestampSeconds,
                     updatetime: timestampSeconds,
                     billtime: timestampSeconds,
-                    categoryname: parsedData.category_name,
+                    categoryname: parsedData.category_name || "其他",
                     categoryid: realCategoryId,
                     cate_type: realCateType,
                     category_type: 0, 
@@ -185,7 +185,18 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
                 return;
             }
             console.log("成功原生推送到钱迹云端：" + pushData);
-            $done({ response: { status: 200, body: JSON.stringify({ success: true, message: "记账成功并已云同步！" }) } });
+            
+            // 严谨判断钱迹服务端的业务状态码，而不是掩耳盗铃
+            let qianjiResp = null;
+            try {
+                qianjiResp = JSON.parse(pushData);
+            } catch (e) {}
+
+            if (qianjiResp && qianjiResp.ec === 0) {
+                $done({ response: { status: 200, body: JSON.stringify({ success: true, message: "记账成功并已云同步！", data: qianjiResp }) } });
+            } else {
+                $done({ response: { status: 500, body: JSON.stringify({ error: "被钱迹服务器拒绝", cloudflare_parsed: parsedData, qianji_response: pushData, sent_payload: pushPayload }) } });
+            }
         });
     });
 } else {
