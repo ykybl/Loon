@@ -42,7 +42,7 @@ if (url.includes("api.qianjiapp.com")) {
 // ==========================================
 // 模块 2：拦截快捷指令的虚拟请求并代工执行
 // ==========================================
-else if (url.includes("qianji.renflyp.local/add_bill")) {
+else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
     console.log("钱迹：收到 iOS 快捷指令发来的 AI 记账请求！");
     
     let sourceText = "";
