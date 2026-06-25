@@ -45,8 +45,7 @@
 4. 输入对应插件的 Raw 代理链接（建议复制下方链接）：
    - 微信: `https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/WeChat_AdBlock.plugin`
    - QQ音乐: `https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/QQMusic_AdBlock.plugin`
-   - 钱迹会员解锁: `https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_vip.plugin`
-   - 钱迹AI解析劫持: `https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_ai_hijack.plugin`
+   - 钱迹会员解锁(含AI劫持): `https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_vip.plugin`
    - 菜鸟去广告: `https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/Cainiao_AdBlock.plugin`
 5. 开启插件，并确保 MITM 主机名中已包含插件所需的域名。
 
