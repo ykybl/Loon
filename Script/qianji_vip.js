@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 钱迹本地 VIP 解锁脚本 - 适配 v5.5.5+
  * 作者：ykybl0008
  */
@@ -70,7 +70,7 @@ if (body) {
         // 精准放行数据同步接口，避免 JS JSON.parse() 丢失 64位长整型 ID 精度！
         // 如果是同步接口且正常（非8888），直接原样返回，不进行深度解锁
         // ======================================================
-        if (url.includes("/bill/") || url.includes("/syncv2/") || url.includes("/tag/") || url.includes("/category/")) {
+        if (url.includes("/bill/") || url.includes("/syncv2/") || url.includes("/tag/") || url.includes("/category/") || url.includes("/auto/")) {
             $done({ body });
             return;
         }
