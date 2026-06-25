@@ -3,7 +3,7 @@
  * 作用：绕过本地快捷指令的 VIP 限制与异常弹窗死锁。
  * 原理：拦截自定义本地请求，调用 CF 云端大模型，然后使用保存的官方 Token 直接向钱迹服务器静默写入账单！
  * 
- * 作者：ykybl0027
+ * 作者：ykybl0028
  */
 
 const url = ($request && $request.url) ? $request.url : "";

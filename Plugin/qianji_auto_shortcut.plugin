@@ -1,6 +1,6 @@
 #!name=钱迹自动记账网关 (直推云端版)
 #!desc=配合 iOS 快捷指令使用，拦截本地请求并调用云端 CF 大模型，解析后直接静默推送到钱迹云端，彻底告别封号与弹窗。
-#!author=ykybl0026
+#!author=ykybl0028
 #!homepage=https://github.com/ykybl/Loon
 #!icon=https://raw.githubusercontent.com/ykybl/Loon/main/Icon/qianji.png
 
@@ -11,7 +11,11 @@ http-request ^https:\/\/api\.qianjiapp\.com\/(syncv2\/|category\/list|asset\/lis
 http-response ^https:\/\/api\.qianjiapp\.com\/(category\/list|asset\/list) script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js, requires-body=true, tag=钱迹分类数据抓取
 
 # 拦截快捷指令的虚拟网关请求并代工执行
-http-request ^https:\/\/api\.qianjiapp\.com\/hijack_add_bill script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js, requires-body=true, timeout=30, tag=钱迹云端AI代工
+http-request ^https:\/\/api\.qianjiapp\.com\/hijack_add_bill script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js, requires-body=true, timeout=120, tag=钱迹云端AI代工
 
 [MitM]
 hostname = api.qianjiapp.com
+
+[Rule]
+# 强制让 Cloudflare 绑定的自建域名走代理节点，避免 DNS 污染或请求阻断导致的 Request timeout
+DOMAIN-SUFFIX,qianji.renflyp.dpdns.org,PROXY
