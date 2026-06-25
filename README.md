@@ -29,7 +29,11 @@
 - **功能**: 解锁本地钱迹会员权限（支持 v4.4.3+ ），配合 iOS 原生快捷指令可以实现全自动、免跳转的无感记账。
 - **配置**: [qianji_vip.plugin](https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_vip.plugin)
 
-### 4. 菜鸟去广告净化 (Cainiao_AdBlock)
+### 4. 钱迹 AI 解析本地劫持 (qianji_ai_hijack)
+- **功能**: 拦截钱迹官方 AI 解析请求 (/emmav2/ocr2bill)，将其转发到自建的 AI 后端。完美绕过因本地破解 VIP 导致的官方签名拦截。需配合【钱迹本地会员解锁】插件使用。
+- **配置**: [qianji_ai_hijack.plugin](https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_ai_hijack.plugin)
+
+### 5. 菜鸟去广告净化 (Cainiao_AdBlock)
 - **功能**: 拦截菜鸟 APP 内开屏广告、物流详情横幅、推流列表页等原生广告，以及广点通、穿山甲等第三方联盟请求。
 - **配置**: [Cainiao_AdBlock.plugin](https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/Cainiao_AdBlock.plugin)
 
@@ -42,6 +46,7 @@
    - 微信: `https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/WeChat_AdBlock.plugin`
    - QQ音乐: `https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/QQMusic_AdBlock.plugin`
    - 钱迹会员解锁: `https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_vip.plugin`
+   - 钱迹AI解析劫持: `https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_ai_hijack.plugin`
    - 菜鸟去广告: `https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/Cainiao_AdBlock.plugin`
 5. 开启插件，并确保 MITM 主机名中已包含插件所需的域名。
 
