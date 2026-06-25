@@ -69,7 +69,7 @@ if (body) {
         // ======================================================
         // 白名单机制：只有明确需要修改 VIP 状态的接口，才进行 JSON 解析和伪造
         // ======================================================
-        const targetUrls = ["/vip/config", "/vip/configios", "/v1/user/info", "/active/home", "/client/init"];
+        const targetUrls = ["/vip/config", "/vip/configios"];
         let shouldUnlock = targetUrls.some(p => url.includes(p));
 
         if (shouldUnlock && obj) {
@@ -81,7 +81,7 @@ if (body) {
                     if (lk === 'isvip' || lk === 'is_vip' || lk === 'vip') {
                         if (typeof target[key] === 'boolean' || typeof target[key] === 'number') target[key] = true;
                     } else if (lk === 'viptype' || lk === 'vip_type') {
-                        target[key] = 100; // 必须恢复为 100，否则快捷指令本地校验不通过
+                        target[key] = 100; // 保持 100 以通过快捷指令本地校验
                     } else if (lk === 'vipend' || lk === 'vip_end') {
                         target[key] = 4092599349;
                     } else if (lk === 'vipstart' || lk === 'vip_start') {
@@ -102,7 +102,7 @@ if (body) {
 
             deepUnlock(obj);
             body = JSON.stringify(obj);
-            console.log("钱迹 VIP 解锁成功 (ykybl0013)");
+            console.log("钱迹 VIP 解锁成功 (ykybl0014)");
         }
         
         $done({ body });
