@@ -75,18 +75,29 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
     const assets = JSON.parse(assetsStr);
     const authHeaders = JSON.parse(headersStr);
 
-    // 适配现有的云端解析结构
+    // 适配现有的云端解析结构，并大幅缩减体积防 OOM
     const formattedAssets = assets.map(a => [a.name, a.id]);
+    const formattedCategories = categories.map(cat => {
+        // 兼容钱迹的子分类字段名（可能叫 childList, childs 等）
+        let subCats = cat.childList || cat.subList || cat.childs || cat.subs || [];
+        return {
+            id: cat.id,
+            name: cat.name,
+            type: cat.type,
+            subs: subCats.map(sub => sub.name || sub)
+        };
+    });
 
     // 2. 发往 Cloudflare 自己的 AI 进行解析
     const aiApiUrl = "https://qianji.renflyp.dpdns.org/parse";
     const cfRequest = {
         url: aiApiUrl,
+        timeout: 60, // 强制 60 秒超时，因为硅基流动大模型有时需要 10-15 秒生成时间
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             text: sourceText,
             assets: formattedAssets,
-            categories: categories
+            categories: formattedCategories
         })
     };
 
@@ -122,17 +133,13 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
         let realCateType = 0;
         let isSubCategory = 0;
         
-        if (parsedData.category_idx !== undefined && categories[parsedData.category_idx]) {
-            const masterCat = categories[parsedData.category_idx];
+        if (parsedData.category_idx !== undefined && formattedCategories[parsedData.category_idx]) {
+            const masterCat = formattedCategories[parsedData.category_idx];
             realCategoryId = masterCat.id;
             realCateType = masterCat.type; // 0支出, 1收入
             
             if (parsedData.sub_category_idx !== undefined && masterCat.subs && masterCat.subs[parsedData.sub_category_idx]) {
-                // Wait, subs in JSON are strings or objects? 
-                // ai_worker.js treats them as strings: subs[j] === parsedAi.sub_category
-                // But Qianji's API needs the real sub category ID! 
-                // Actually if we just pass the master category ID, Qianji still accepts it.
-                // Or we can just use 0 for sub category for now to ensure it saves safely.
+                // 如果需要可以获取子分类ID，但为了保险暂时不强制要求
             }
         }
 
