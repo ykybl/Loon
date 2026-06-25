@@ -3,7 +3,7 @@
  * 作用：绕过本地快捷指令的 VIP 限制与异常弹窗死锁。
  * 原理：拦截自定义本地请求，调用 CF 云端大模型，然后使用保存的官方 Token 直接向钱迹服务器静默写入账单！
  * 
- * 作者：ykybl0032
+ * 作者：ykybl0033
  */
 
 const url = ($request && $request.url) ? $request.url : "";
@@ -14,7 +14,19 @@ const url = ($request && $request.url) ? $request.url : "";
 if (url.includes("api.qianjiapp.com") && !url.includes("api.qianjiapp.com/hijack_add_bill")) {
     if (url.includes("/category/list") || url.includes("/asset/list") || url.includes("/syncv2/pull")) {
         // 保存全量请求头（包含授权信息）
-        $persistentStore.write(JSON.stringify($request.headers), "qianji_auth_headers");
+        let authHeaders = $request.headers;
+        if (authHeaders["tok"]) authHeaders["tok"] = authHeaders["tok"];
+        if (authHeaders["reqidv2"]) authHeaders["reqidv2"] = authHeaders["reqidv2"];
+        
+        $persistentStore.write(JSON.stringify(authHeaders), "qianji_auth_headers");
+        
+        // 提取并保存用户的 UID
+        if ($request.body) {
+            const uidMatch = $request.body.match(/(?:^|&)uid=([^&]+)/);
+            if (uidMatch && uidMatch[1]) {
+                $persistentStore.write(uidMatch[1], "qianji_uid");
+            }
+        }
     }
 
     if ($response && $response.body) {
@@ -65,9 +77,10 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
     const categoriesStr = $persistentStore.read("qianji_categories");
     const assetsStr = $persistentStore.read("qianji_assets");
     const headersStr = $persistentStore.read("qianji_auth_headers");
+    const qianjiUid = $persistentStore.read("qianji_uid");
 
-    if (!categoriesStr || !assetsStr || !headersStr) {
-        $done({ response: { status: 400, body: JSON.stringify({ error: "缺失关键数据。请先打开一次钱迹 App 刷新，以便脚本抓取凭证！" }) } });
+    if (!categoriesStr || !assetsStr || !headersStr || !qianjiUid) {
+        $done({ response: { status: 400, body: JSON.stringify({ error: "缺失关键数据（未获取到UID或凭证）。请先打开一次钱迹 App，下拉刷新一次列表，以便脚本抓取凭证！" }) } });
         return;
     }
 
@@ -148,7 +161,7 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
 
         const qianjiInnerList = [{
             "id": fakeBillId,
-            "userid": "", // 后台以 header 中的 utoken/tok 为准
+            "userid": qianjiUid,
             "bookid": -1,
             "type": parsedData.billType && parsedData.billType.value === "income" ? 1 : 0,
             "remark": parsedData.remark || "快捷指令自动记账",
@@ -178,8 +191,8 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
             }
         });
 
-        // 拼接为 x-www-form-urlencoded
-        const formBody = "v=" + encodeURIComponent(vStr);
+        // 拼接为 x-www-form-urlencoded，同时带上必须的 uid 与 fr 字段
+        const formBody = "uid=" + encodeURIComponent(qianjiUid) + "&fr=" + encodeURIComponent(qianjiUid) + "&v=" + encodeURIComponent(vStr);
 
         const pushReq = {
             url: "https://api.qianjiapp.com/bill/syncall",
