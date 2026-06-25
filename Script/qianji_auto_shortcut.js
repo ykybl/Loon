@@ -3,7 +3,7 @@
  * 作用：绕过本地快捷指令的 VIP 限制与异常弹窗死锁。
  * 原理：拦截自定义本地请求，调用 CF 云端大模型，然后使用保存的官方 Token 直接向钱迹服务器静默写入账单！
  * 
- * 作者：ykybl0031
+ * 作者：ykybl0032
  */
 
 const url = ($request && $request.url) ? $request.url : "";
@@ -146,30 +146,45 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
             }
         }
 
-        const pushPayload = {
-            data: [
-                {
-                    id: fakeBillId,
-                    type: parsedData.billType && parsedData.billType.value === "income" ? 1 : 0,
-                    money: parseFloat(parsedData.amount) || 0,
-                    remark: parsedData.remark || "快捷指令自动记账",
-                    createtime: timestampSeconds,
-                    updatetime: timestampSeconds,
-                    billtime: timestampSeconds,
-                    categoryname: parsedData.category_name || "其他",
-                    categoryid: realCategoryId,
-                    cate_type: realCateType,
-                    category_type: 0, 
-                    assetid: realAssetId,
-                    status: 0
-                }
-            ]
-        };
+        const qianjiInnerList = [{
+            "id": fakeBillId,
+            "userid": "", // 后台以 header 中的 utoken/tok 为准
+            "bookid": -1,
+            "type": parsedData.billType && parsedData.billType.value === "income" ? 1 : 0,
+            "remark": parsedData.remark || "快捷指令自动记账",
+            "money": parseFloat(parsedData.amount) || 0,
+            "status": 2, // 抓包中正常写入是 2
+            "cateid": realCategoryId,
+            "time": timestampSeconds,
+            "createtime": timestampSeconds,
+            "updatetime": timestampSeconds,
+            "assetid": realAssetId,
+            "fromid": -1,
+            "targetid": -1,
+            "category": null,
+            "extra": {"baoxiaoed":0,"baoxiaotime":0,"baoxiaov":-1.0,"transfee":0.0,"tags":null},
+            "fromact": null,
+            "targetact": null,
+            "packid": -1,
+            "platform": 0,
+            "username": null,
+            "bookname": null,
+            "images": null
+        }];
+
+        const vStr = JSON.stringify({
+            bills: {
+                changelist: JSON.stringify(qianjiInnerList)
+            }
+        });
+
+        // 拼接为 x-www-form-urlencoded
+        const formBody = "v=" + encodeURIComponent(vStr);
 
         const pushReq = {
-            url: "https://api.qianjiapp.com/syncv2/push",
+            url: "https://api.qianjiapp.com/bill/syncall",
             headers: authHeaders,
-            body: JSON.stringify(pushPayload)
+            body: formBody
         };
         
         // 覆盖一些可能导致校验失败的 Headers
@@ -177,7 +192,7 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
         if (pushReq.headers["content-length"]) delete pushReq.headers["content-length"];
         if (pushReq.headers["Content-Type"]) delete pushReq.headers["Content-Type"];
         if (pushReq.headers["content-type"]) delete pushReq.headers["content-type"];
-        pushReq.headers["Content-Type"] = "application/json; charset=utf-8";
+        pushReq.headers["Content-Type"] = "application/x-www-form-urlencoded";
 
         $httpClient.post(pushReq, function(pushErr, pushResp, pushData) {
             if (pushErr) {
@@ -195,7 +210,7 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
             if (qianjiResp && qianjiResp.ec === 0) {
                 $done({ response: { status: 200, body: JSON.stringify({ success: true, message: "记账成功并已云同步！", data: qianjiResp }) } });
             } else {
-                $done({ response: { status: 500, body: JSON.stringify({ error: "被钱迹服务器拒绝", cloudflare_parsed: parsedData, qianji_response: pushData, sent_payload: pushPayload }) } });
+                $done({ response: { status: 500, body: JSON.stringify({ error: "被钱迹服务器拒绝", cloudflare_parsed: parsedData, qianji_response: pushData, sent_payload: qianjiInnerList }) } });
             }
         });
     });
