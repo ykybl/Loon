@@ -3,7 +3,7 @@
  * 作用：绕过本地快捷指令的 VIP 限制与异常弹窗死锁。
  * 原理：拦截自定义本地请求，调用 CF 云端大模型，然后使用保存的官方 Token 直接向钱迹服务器静默写入账单！
  * 
- * 作者：ykybl0033
+ * 作者：ykybl0034
  */
 
 const url = ($request && $request.url) ? $request.url : "";
@@ -19,14 +19,6 @@ if (url.includes("api.qianjiapp.com") && !url.includes("api.qianjiapp.com/hijack
         if (authHeaders["reqidv2"]) authHeaders["reqidv2"] = authHeaders["reqidv2"];
         
         $persistentStore.write(JSON.stringify(authHeaders), "qianji_auth_headers");
-        
-        // 提取并保存用户的 UID
-        if ($request.body) {
-            const uidMatch = $request.body.match(/(?:^|&)uid=([^&]+)/);
-            if (uidMatch && uidMatch[1]) {
-                $persistentStore.write(uidMatch[1], "qianji_uid");
-            }
-        }
     }
 
     if ($response && $response.body) {
@@ -77,16 +69,28 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
     const categoriesStr = $persistentStore.read("qianji_categories");
     const assetsStr = $persistentStore.read("qianji_assets");
     const headersStr = $persistentStore.read("qianji_auth_headers");
-    const qianjiUid = $persistentStore.read("qianji_uid");
 
-    if (!categoriesStr || !assetsStr || !headersStr || !qianjiUid) {
-        $done({ response: { status: 400, body: JSON.stringify({ error: "缺失关键数据（未获取到UID或凭证）。请先打开一次钱迹 App，下拉刷新一次列表，以便脚本抓取凭证！" }) } });
+    if (!categoriesStr || !assetsStr || !headersStr) {
+        $done({ response: { status: 400, body: JSON.stringify({ error: "缺失关键数据。请先打开一次钱迹 App，下拉刷新一次列表，以便脚本抓取凭证！" }) } });
         return;
     }
 
     const categories = JSON.parse(categoriesStr);
     const assets = JSON.parse(assetsStr);
     const authHeaders = JSON.parse(headersStr);
+
+    // 绝杀：直接从已经保存的官方数据中提取真实的 userid！
+    let qianjiUid = "";
+    if (assets && assets.length > 0 && assets[0].userid) {
+        qianjiUid = assets[0].userid;
+    } else if (categories && categories.length > 0 && categories[0].userid) {
+        qianjiUid = categories[0].userid;
+    }
+
+    if (!qianjiUid) {
+        $done({ response: { status: 400, body: JSON.stringify({ error: "无法从您的本地资产中提取到UID，请去钱迹里新建一个资产或分类后再试！" }) } });
+        return;
+    }
 
     // 适配现有的云端解析结构，并大幅缩减体积防 OOM
     const formattedAssets = assets.map(a => [a.name, a.id]);
