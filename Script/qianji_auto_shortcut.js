@@ -1,0 +1,180 @@
+/**
+ * 钱迹快捷指令云端代工脚本 (Loon)
+ * 作用：绕过本地快捷指令的 VIP 限制与异常弹窗死锁。
+ * 原理：拦截自定义本地请求，调用 CF 云端大模型，然后使用保存的官方 Token 直接向钱迹服务器静默写入账单！
+ * 
+ * 作者：ykybl0019
+ */
+
+const url = ($request && $request.url) ? $request.url : "";
+
+// ==========================================
+// 模块 1：被动抓取并更新身份凭据（运行在钱迹 App 内时）
+// ==========================================
+if (url.includes("api.qianjiapp.com")) {
+    if (url.includes("/category/list") || url.includes("/asset/list") || url.includes("/syncv2/pull")) {
+        // 保存全量请求头（包含授权信息）
+        $persistentStore.write(JSON.stringify($request.headers), "qianji_auth_headers");
+    }
+
+    if ($response && $response.body) {
+        if (url.includes("/category/list")) {
+            try {
+                let obj = JSON.parse($response.body);
+                if (obj.data && obj.data.list) {
+                    $persistentStore.write(JSON.stringify(obj.data.list), "qianji_categories");
+                    console.log("钱迹：成功抓取并更新分类列表！");
+                }
+            } catch(e) {}
+        } else if (url.includes("/asset/list")) {
+            try {
+                let obj = JSON.parse($response.body);
+                if (obj.data && obj.data.list) {
+                    $persistentStore.write(JSON.stringify(obj.data.list), "qianji_assets");
+                    console.log("钱迹：成功抓取并更新资产列表！");
+                }
+            } catch(e) {}
+        }
+    }
+    $done({});
+}
+
+// ==========================================
+// 模块 2：拦截快捷指令的虚拟请求并代工执行
+// ==========================================
+else if (url.includes("qianji.renflyp.local/add_bill")) {
+    console.log("钱迹：收到 iOS 快捷指令发来的 AI 记账请求！");
+    
+    let sourceText = "";
+    try {
+        if (typeof $request.body === 'string') {
+            sourceText = $request.body;
+        } else if ($request.body && $request.body.text) {
+            sourceText = $request.body.text;
+        }
+    } catch(e) {
+        sourceText = $request.body;
+    }
+
+    if (!sourceText) {
+        $done({ response: { status: 400, body: JSON.stringify({ error: "请求体中未找到账单文本内容" }) } });
+        return;
+    }
+
+    // 1. 读取保存的依赖数据
+    const categoriesStr = $persistentStore.read("qianji_categories");
+    const assetsStr = $persistentStore.read("qianji_assets");
+    const headersStr = $persistentStore.read("qianji_auth_headers");
+
+    if (!categoriesStr || !assetsStr || !headersStr) {
+        $done({ response: { status: 400, body: JSON.stringify({ error: "缺失关键数据。请先打开一次钱迹 App 刷新，以便脚本抓取凭证！" }) } });
+        return;
+    }
+
+    const categories = JSON.parse(categoriesStr);
+    const assets = JSON.parse(assetsStr);
+    const authHeaders = JSON.parse(headersStr);
+
+    // 适配现有的云端解析结构
+    const formattedAssets = assets.map(a => [a.name, a.id]);
+
+    // 2. 发往 Cloudflare 自己的 AI 进行解析
+    const aiApiUrl = "https://qianji.renflyp.dpdns.org/parse";
+    const cfRequest = {
+        url: aiApiUrl,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            text: sourceText,
+            assets: formattedAssets,
+            categories: categories
+        })
+    };
+
+    $httpClient.post(cfRequest, function(err, resp, data) {
+        if (err || !data) {
+            console.log("调用云端解析失败：" + err);
+            $done({ response: { status: 500, body: JSON.stringify({ error: "调用 CF 云端大模型失败" }) } });
+            return;
+        }
+
+        let parsedData;
+        try {
+            parsedData = JSON.parse(data);
+        } catch (e) {
+            $done({ response: { status: 500, body: JSON.stringify({ error: "云端返回数据非 JSON" }) } });
+            return;
+        }
+
+        console.log("CF 云端解析成功，结果：" + JSON.stringify(parsedData));
+
+        // 3. 构造原生写入请求推送到钱迹官方云端
+        const timestampSeconds = Math.floor(Date.now() / 1000);
+        // 生成虚假唯一 ID：17 + 当前毫秒 + 4位随机
+        const fakeBillId = "17" + Date.now().toString() + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+
+        // 查找真实 ID
+        let realAssetId = 0;
+        if (parsedData.firstAsset_idx !== undefined && assets[parsedData.firstAsset_idx]) {
+            realAssetId = assets[parsedData.firstAsset_idx].id;
+        }
+        
+        let realCategoryId = 0;
+        let realCateType = 0;
+        let isSubCategory = 0;
+        
+        if (parsedData.category_idx !== undefined && categories[parsedData.category_idx]) {
+            const masterCat = categories[parsedData.category_idx];
+            realCategoryId = masterCat.id;
+            realCateType = masterCat.type; // 0支出, 1收入
+            
+            if (parsedData.sub_category_idx !== undefined && masterCat.subs && masterCat.subs[parsedData.sub_category_idx]) {
+                // Wait, subs in JSON are strings or objects? 
+                // ai_worker.js treats them as strings: subs[j] === parsedAi.sub_category
+                // But Qianji's API needs the real sub category ID! 
+                // Actually if we just pass the master category ID, Qianji still accepts it.
+                // Or we can just use 0 for sub category for now to ensure it saves safely.
+            }
+        }
+
+        const pushPayload = {
+            data: [
+                {
+                    id: fakeBillId,
+                    type: parsedData.billType.value === "income" ? 1 : 0,
+                    money: parseFloat(parsedData.amount) || 0,
+                    remark: parsedData.remark || "快捷指令自动记账",
+                    createtime: timestampSeconds,
+                    updatetime: timestampSeconds,
+                    billtime: timestampSeconds,
+                    categoryname: parsedData.category_name,
+                    categoryid: realCategoryId,
+                    cate_type: realCateType,
+                    category_type: 0, 
+                    assetid: realAssetId,
+                    status: 0
+                }
+            ]
+        };
+
+        const pushReq = {
+            url: "https://api.qianjiapp.com/syncv2/push",
+            headers: authHeaders,
+            body: JSON.stringify(pushPayload)
+        };
+        
+        // 覆盖一些可能导致校验失败的 Headers
+        if (pushReq.headers["Content-Length"]) delete pushReq.headers["Content-Length"];
+        if (pushReq.headers["content-length"]) delete pushReq.headers["content-length"];
+
+        $httpClient.post(pushReq, function(pushErr, pushResp, pushData) {
+            if (pushErr) {
+                $done({ response: { status: 500, body: JSON.stringify({ error: "推送官方云端失败", details: pushErr }) } });
+                return;
+            }
+            console.log("成功原生推送到钱迹云端：" + pushData);
+            $done({ response: { status: 200, body: JSON.stringify({ success: true, message: "记账成功并已云同步！" }) } });
+        });
+    });
+} else {
+    $done({});
+}

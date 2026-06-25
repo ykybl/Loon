@@ -30,7 +30,11 @@
 - **配置**: [qianji_vip.plugin](https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_vip.plugin)
 
 ### 4. 钱迹 AI 解析本地劫持 (qianji_ai_hijack)
-- **功能**: 拦截钱迹官方 AI 解析请求 (/emmav2/ocr2bill)，将其转发到自建的 AI 后端。完美绕过因本地破解 VIP 导致的官方签名拦截。需配合【钱迹本地会员解锁】插件使用。
+- **功能**: 拦截* 钱迹本地 VIP 解锁 - 适配 v5.5.5+
+* 钱迹 OCR 请求劫持 - 用于转发请求到自建云端
+
+### 钱迹自动记账网关 (直推云端版)
+绕过快捷指令 VIP 限制，本地抓包静默推云端。订阅链接：`https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_auto_shortcut.plugin`的 AI 后端。完美绕过因本地破解 VIP 导致的官方签名拦截。需配合【钱迹本地会员解锁】插件使用。
 - **配置**: [qianji_ai_hijack.plugin](https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_ai_hijack.plugin)
 
 ### 5. 菜鸟去广告净化 (Cainiao_AdBlock)

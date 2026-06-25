@@ -1,0 +1,17 @@
+#!name=钱迹自动记账网关 (直推云端版)
+#!desc=配合 iOS 快捷指令使用，拦截本地请求并调用云端 CF 大模型，解析后直接静默推送到钱迹云端，彻底告别封号与弹窗。
+#!author=ykybl0019
+#!homepage=https://github.com/ykybl/Loon
+#!icon=https://raw.githubusercontent.com/ykybl/Loon/main/Icon/qianji.png
+
+[Script]
+# 监听官方接口，被动抓取最新的 Token 和资产分类数据
+http-request ^https:\/\/api\.qianjiapp\.com\/(syncv2\/|category\/list|asset\/list) script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js, requires-body=false, tag=钱迹凭证抓取
+
+http-response ^https:\/\/api\.qianjiapp\.com\/(category\/list|asset\/list) script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js, requires-body=true, tag=钱迹分类数据抓取
+
+# 拦截快捷指令的虚拟网关请求并代工执行
+http-request ^http:\/\/qianji\.renflyp\.local\/add_bill script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js, requires-body=true, timeout=30, tag=钱迹云端AI代工
+
+[MitM]
+hostname = api.qianjiapp.com, qianji.renflyp.local
