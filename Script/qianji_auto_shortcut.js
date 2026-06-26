@@ -3,7 +3,7 @@
  * 作用：绕过本地快捷指令的 VIP 限制与异常弹窗死锁。
  * 原理：拦截自定义本地请求，调用 CF 云端大模型，然后使用保存的官方 Token 直接向钱迹服务器静默写入账单！
  * 
- * 作者：ykybl0043
+ * 作者：ykybl0044
  */
 
 const url = ($request && $request.url) ? $request.url : "";
@@ -130,9 +130,10 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
             return;
         }
 
-        // 调试模式：把云端返回的完整内容传回给快捷指令查看
-        console.log("CF 云端返回：" + data);
-        $done({ response: { status: 200, body: data } });
+        // 云端已返回秒级 200 响应，直接结束本地快捷指令请求，让 iOS 圈圈消失
+        // 后续的长耗时大模型解析与记账写入，完全由 CF Worker 内部的 ctx.waitUntil() 异步静默代工
+        console.log("已成功移交云端异步处理队列！");
+        $done({ response: { status: 200, body: JSON.stringify({ success: true, message: "云端已接管账单！AI 正在看图识账，请稍后刷新钱迹查看！" }) } });
     });
 } else {
     $done({});
