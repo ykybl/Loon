@@ -80,7 +80,9 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
     const tokenPayload = {
         success: true,
         uid: qianjiUid,
-        worker_url: `https://qianji.renflyp.dpdns.org/?uid=${encodeURIComponent(qianjiUid)}&auth=${encodeURIComponent(authHeadersStr)}`
+        worker_url: `https://qianji.renflyp.dpdns.org/?uid=${encodeURIComponent(qianjiUid)}&auth=${encodeURIComponent(authHeadersStr)}`,
+        categories: categories,
+        assets: assets
     };
 
     $done({
