@@ -1,6 +1,6 @@
 #!name=钱迹自动记账网关 (直推云端版)
 #!desc=配合 iOS 快捷指令使用，拦截本地请求并调用云端 CF 大模型，解析后直接静默推送到钱迹云端，彻底告别封号与弹窗。
-#!author=ykybl0052
+#!author=ykybl0053
 #!homepage=https://github.com/ykybl/Loon
 #!icon=https://raw.githubusercontent.com/ykybl/Loon/main/Icon/qianji.png
 
@@ -10,8 +10,8 @@ http-request ^https:\/\/api\.qianjiapp\.com\/(syncv2\/|category\/list|asset\/lis
 
 http-response ^https:\/\/api\.qianjiapp\.com\/(category\/list|asset\/list) script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js, requires-body=true, tag=钱迹分类数据抓取
 
-# 拦截快捷指令的虚拟网关请求并代工执行
-http-request ^https:\/\/api\.qianjiapp\.com\/hijack_add_bill script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js, requires-body=false, timeout=120, tag=钱迹云端AI代工
+# 拦截快捷指令的虚拟网关请求，返回 Token 凭证（不读取 body，防止大图片导致 OOM）
+http-request ^https:\/\/api\.qianjiapp\.com\/hijack_add_bill script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js, requires-body=false, timeout=120, tag=钱迹凭证提取
 
 [MitM]
 hostname = api.qianjiapp.com
@@ -19,5 +19,5 @@ hostname = api.qianjiapp.com
 [Rule]
 # ★★★ workers.dev 在中国大陆被 GFW 完全封锁，必须走代理节点！★★★
 DOMAIN-SUFFIX,workers.dev,PROXY
-# 旧的自定义域名规则（备用）
+# 自定义域名走直连
 DOMAIN-SUFFIX,qianji.renflyp.dpdns.org,DIRECT

@@ -1,19 +1,19 @@
 /**
- * 閽辫抗蹇嵎鎸囦护浜戠浠ｅ伐鑴氭湰 (Loon)
- * 浣滅敤锛氱粫杩囨湰鍦板揩鎹锋寚浠ょ殑 VIP 闄愬埗涓庡紓甯稿脊绐楁閿併€?
- * 鍘熺悊锛氭嫤鎴嚜瀹氫箟鏈湴璇锋眰锛岃皟鐢?CF 浜戠澶фā鍨嬶紝鐒跺悗浣跨敤淇濆瓨鐨勫畼鏂?Token 鐩存帴鍚戦挶杩规湇鍔″櫒闈欓粯鍐欏叆璐﹀崟锛?
+ * 钱迹快捷指令云端代工脚本 (Loon)
+ * 作用：绕过本地快捷指令的 VIP 限制与异常弹窗拦截。
+ * 原理：拦截自定义本地请求，调用 CF 云端大模型，然后使用保存的官方 Token 直接向钱迹服务器静默写入账单。
  * 
- * 作者：ykybl0052
+ * 作者：ykybl0053
  */
 
 const url = ($request && $request.url) ? $request.url : "";
 
 // ==========================================
-// 妯″潡 1锛氳鍔ㄦ姄鍙栧苟鏇存柊韬唤鍑嵁锛堣繍琛屽湪閽辫抗 App 鍐呮椂锛?
+// 模块 1：被动抓取并更新身份凭证（运行在钱迹 App 内时）
 // ==========================================
 if (url.includes("api.qianjiapp.com") && !url.includes("api.qianjiapp.com/hijack_add_bill")) {
     if (url.includes("/category/list") || url.includes("/asset/list") || url.includes("/syncv2/pull")) {
-        // 淇濆瓨鍏ㄩ噺璇锋眰澶达紙鍖呭惈鎺堟潈淇℃伅锛?
+        // 保存全量请求头（包含授权信息）
         let authHeaders = $request.headers;
         if (authHeaders["tok"]) authHeaders["tok"] = authHeaders["tok"];
         if (authHeaders["reqidv2"]) authHeaders["reqidv2"] = authHeaders["reqidv2"];
@@ -27,7 +27,7 @@ if (url.includes("api.qianjiapp.com") && !url.includes("api.qianjiapp.com/hijack
                 let obj = JSON.parse($response.body);
                 if (obj.data && obj.data.list) {
                     $persistentStore.write(JSON.stringify(obj.data.list), "qianji_categories");
-                    console.log("閽辫抗锛氭垚鍔熸姄鍙栧苟鏇存柊鍒嗙被鍒楄〃锛?);
+                    console.log("钱迹：成功抓取并更新分类列表");
                 }
             } catch(e) {}
         } else if (url.includes("/asset/list")) {
@@ -35,7 +35,7 @@ if (url.includes("api.qianjiapp.com") && !url.includes("api.qianjiapp.com/hijack
                 let obj = JSON.parse($response.body);
                 if (obj.data && obj.data.list) {
                     $persistentStore.write(JSON.stringify(obj.data.list), "qianji_assets");
-                    console.log("閽辫抗锛氭垚鍔熸姄鍙栧苟鏇存柊璧勪骇鍒楄〃锛?);
+                    console.log("钱迹：成功抓取并更新资产列表");
                 }
             } catch(e) {}
         }
@@ -44,16 +44,17 @@ if (url.includes("api.qianjiapp.com") && !url.includes("api.qianjiapp.com/hijack
 }
 
 // ==========================================
-// 妯″潡 2锛氭嫤鎴揩鎹锋寚浠ょ殑铏氭嫙璇锋眰骞朵唬宸ユ墽琛?
+// 模块 2：拦截快捷指令的虚拟请求，返回 Token 凭证
+// 快捷指令拿到 Token 后，自行直接 POST 图片给 CF Worker
 // ==========================================
 else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
-    console.log("钱迹：收到 iOS 快捷指令发来的 AI 记账请求，准备 307 重定向...");
+    console.log("钱迹：收到快捷指令凭证请求，提取本地 Token 并返回...");
     const headersStr = $persistentStore.read("qianji_auth_headers");
     const categoriesStr = $persistentStore.read("qianji_categories");
     const assetsStr = $persistentStore.read("qianji_assets");
 
     if (!headersStr) {
-        $done({ response: { status: 400, body: JSON.stringify({ error: "缺失授权数据。请先打开一次钱迹App，下拉刷新一次列表，以便脚本抓取凭证" }) } });
+        $done({ response: { status: 200, body: JSON.stringify({ error: "缺失授权数据。请先打开一次钱迹App，下拉刷新一次列表，以便脚本抓取凭证" }) } });
         return;
     }
 
@@ -69,21 +70,27 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
     }
 
     if (!qianjiUid) {
-        $done({ response: { status: 400, body: JSON.stringify({ error: "无法从您的本地资产中提取UID，请去钱迹里新建一个资产或分类后再试！" }) } });
+        $done({ response: { status: 200, body: JSON.stringify({ error: "无法从您的本地资产中提取UID，请去钱迹里新建一个资产或分类后再试！" }) } });
         return;
     }
 
     let tok = authHeaders["tok"] || "";
     let cookie = authHeaders["Cookie"] || authHeaders["cookie"] || "";
 
-    const redirectUrl = `https://qianji.renflyp.dpdns.org/?uid=${encodeURIComponent(qianjiUid)}&tok=${encodeURIComponent(tok)}&cookie=${encodeURIComponent(cookie)}`;
-    
+    // ★ 核心：返回凭证 JSON 给快捷指令，由快捷指令自行构建第二个请求直连 CF Worker
+    const tokenPayload = {
+        success: true,
+        uid: qianjiUid,
+        tok: tok,
+        cookie: cookie,
+        worker_url: `https://qianji.renflyp.dpdns.org/?uid=${encodeURIComponent(qianjiUid)}&tok=${encodeURIComponent(tok)}&cookie=${encodeURIComponent(cookie)}`
+    };
+
     $done({
         response: {
-            status: 307,
-            headers: {
-                "Location": redirectUrl
-            }
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(tokenPayload)
         }
     });
 } else {
