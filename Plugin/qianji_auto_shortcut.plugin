@@ -1,6 +1,6 @@
 #!name=钱迹自动记账网关 (直推云端版)
 #!desc=配合 iOS 快捷指令使用，拦截本地请求并调用云端 CF 大模型，解析后直接静默推送到钱迹云端，彻底告别封号与弹窗。
-#!author=ykybl0036
+#!author=ykybl0037
 #!homepage=https://github.com/ykybl/Loon
 #!icon=https://raw.githubusercontent.com/ykybl/Loon/main/Icon/qianji.png
 

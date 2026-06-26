@@ -4,7 +4,7 @@
  * 转发到自建的 AI 后端（如 Cloudflare Worker 等），
  * 绕过官方因 VIP 签名 (x-signature) 错误导致的拦截！
  * 
- * 作者：ykybl0036
+ * 作者：ykybl0037
  */
 
 const url = ($request && $request.url) ? $request.url : "";

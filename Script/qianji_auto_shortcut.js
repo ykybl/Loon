@@ -3,7 +3,7 @@
  * 作用：绕过本地快捷指令的 VIP 限制与异常弹窗死锁。
  * 原理：拦截自定义本地请求，调用 CF 云端大模型，然后使用保存的官方 Token 直接向钱迹服务器静默写入账单！
  * 
- * 作者：ykybl0036
+ * 作者：ykybl0037
  */
 
 const url = ($request && $request.url) ? $request.url : "";
@@ -117,119 +117,23 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
         body: JSON.stringify({
             text: sourceText,
             assets: formattedAssets,
-            categories: formattedCategories
+            categories: formattedCategories,
+            uid: qianjiUid,
+            auth_headers: authHeaders
         })
     };
 
     $httpClient.post(cfRequest, function(err, resp, data) {
         if (err || !data) {
             console.log("调用云端解析失败：" + JSON.stringify(err || "无数据返回"));
-            $done({ response: { status: 500, body: JSON.stringify({ error: "调用 CF 云端大模型失败: " + JSON.stringify(err || "No data") }) } });
+            $done({ response: { status: 500, body: JSON.stringify({ error: "调用 CF 云端网络失败" }) } });
             return;
         }
 
-        let parsedData;
-        try {
-            parsedData = JSON.parse(data);
-        } catch (e) {
-            $done({ response: { status: 500, body: JSON.stringify({ error: "云端返回数据非 JSON" }) } });
-            return;
-        }
-
-        console.log("CF 云端解析成功，结果：" + JSON.stringify(parsedData));
-
-        // 3. 构造原生写入请求推送到钱迹官方云端
-        const timestampSeconds = Math.floor(Date.now() / 1000);
-        // 生成虚假唯一 ID：缩短到 15 位以内，防止 JS Number 最大精度丢失引发服务端无法识别被拒
-        const fakeBillId = Number(Date.now().toString() + Math.floor(Math.random() * 99).toString().padStart(2, '0'));
-
-        // 查找真实 ID
-        let realAssetId = 0;
-        if (parsedData.firstAsset_idx !== undefined && assets[parsedData.firstAsset_idx]) {
-            realAssetId = assets[parsedData.firstAsset_idx].id;
-        }
-        
-        let realCategoryId = 0;
-        let realCateType = 0;
-        let isSubCategory = 0;
-        
-        if (parsedData.category_idx !== undefined && formattedCategories[parsedData.category_idx]) {
-            const masterCat = formattedCategories[parsedData.category_idx];
-            realCategoryId = masterCat.id;
-            realCateType = masterCat.type; // 0支出, 1收入
-            
-            if (parsedData.sub_category_idx !== undefined && masterCat.subs && masterCat.subs[parsedData.sub_category_idx]) {
-                // 如果需要可以获取子分类ID，但为了保险暂时不强制要求
-            }
-        }
-
-        const qianjiInnerList = [{
-            "id": fakeBillId,
-            "userid": qianjiUid,
-            "bookid": -1,
-            "type": parsedData.billType && parsedData.billType.value === "income" ? 1 : 0,
-            "remark": parsedData.remark || "快捷指令自动记账",
-            "money": parseFloat(parsedData.amount) || 0,
-            "status": 2, // 抓包中正常写入是 2
-            "cateid": realCategoryId,
-            "time": timestampSeconds,
-            "createtime": timestampSeconds,
-            "updatetime": timestampSeconds,
-            "assetid": realAssetId,
-            "fromid": -1,
-            "targetid": -1,
-            "category": null,
-            "extra": {"baoxiaoed":0,"baoxiaotime":0,"baoxiaov":-1.0,"transfee":0.0,"tags":null},
-            "fromact": null,
-            "targetact": null,
-            "packid": -1,
-            "platform": 0,
-            "username": null,
-            "bookname": null,
-            "images": null
-        }];
-
-        const vStr = JSON.stringify({
-            bills: {
-                changelist: JSON.stringify(qianjiInnerList)
-            }
-        });
-
-        // 拼接为 x-www-form-urlencoded，同时带上必须的 uid 与 fr 字段
-        const formBody = "uid=" + encodeURIComponent(qianjiUid) + "&fr=" + encodeURIComponent(qianjiUid) + "&v=" + encodeURIComponent(vStr);
-
-        const pushReq = {
-            url: "https://api.qianjiapp.com/bill/syncall",
-            headers: authHeaders,
-            body: formBody
-        };
-        
-        // 覆盖一些可能导致校验失败的 Headers
-        if (pushReq.headers["Content-Length"]) delete pushReq.headers["Content-Length"];
-        if (pushReq.headers["content-length"]) delete pushReq.headers["content-length"];
-        if (pushReq.headers["Content-Type"]) delete pushReq.headers["Content-Type"];
-        if (pushReq.headers["content-type"]) delete pushReq.headers["content-type"];
-        pushReq.headers["Content-Type"] = "application/x-www-form-urlencoded";
-
-        $httpClient.post(pushReq, function(pushErr, pushResp, pushData) {
-            if (pushErr) {
-                $done({ response: { status: 500, body: JSON.stringify({ error: "推送官方云端失败", details: pushErr }) } });
-                return;
-            }
-            console.log("成功原生推送到钱迹云端：" + pushData);
-            
-            // 严谨判断钱迹服务端的业务状态码，而不是掩耳盗铃
-            let qianjiResp = null;
-            try {
-                qianjiResp = JSON.parse(pushData);
-            } catch (e) {}
-
-            if (qianjiResp && (qianjiResp.ec === 0 || qianjiResp.ec === 200)) {
-                $done({ response: { status: 200, body: JSON.stringify({ success: true, message: "记账成功并已云同步！", data: qianjiResp }) } });
-            } else {
-                $done({ response: { status: 500, body: JSON.stringify({ error: "被钱迹服务器拒绝", cloudflare_parsed: parsedData, qianji_response: pushData, sent_payload: qianjiInnerList }) } });
-            }
-        });
+        // 云端已返回秒级 200 响应，直接结束本地快捷指令请求，让 iOS 圈圈消失
+        // 后续的长耗时大模型解析与记账写入，完全由 CF Worker 内部的 ctx.waitUntil() 异步静默代工
+        console.log("已成功移交云端异步处理队列！");
+        $done({ response: { status: 200, body: JSON.stringify({ success: true, message: "账单已发送至云端 AI 处理，几秒后将自动静默写入钱迹" }) } });
     });
 } else {
     $done({});
