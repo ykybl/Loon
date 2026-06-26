@@ -33,11 +33,11 @@
 - **功能**: 拦截* 钱迹本地 VIP 解锁 - 适配 v5.5.5+
 * 钱迹 OCR 请求劫持 - 用于转发请求到自建云端
 
-### 钱迹自动记账网关 (直推云端版)
-绕过快捷指令 VIP 限制，本地抓包静默推云端。订阅链接：`https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_auto_shortcut.plugin`的 AI 后端。完美绕过因本地破解 VIP 导致的官方签名拦截。需配合【钱迹本地会员解锁】插件使用。
-- **配置**: [qianji_ai_hijack.plugin](https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_ai_hijack.plugin)
+### 5. 钱迹自动记账网关 (直推云端版) - 最新黑科技！
+- **功能**: 绕过快捷指令 VIP 限制，本地抓包静默推云端。**最新更新**：采用了 307 临时重定向黑科技技术，直接穿透了 Loon 拦截巨大图片时导致内存爆满无法发出请求的限制，并彻底修复了 Cloudflare 多节点下 Token 丢失的 Isolate 问题！
+- **订阅链接**: `https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_auto_shortcut.plugin`
 
-### 5. 菜鸟去广告净化 (Cainiao_AdBlock)
+### 6. 菜鸟去广告净化 (Cainiao_AdBlock)
 - **功能**: 拦截菜鸟 APP 内开屏广告、物流详情横幅、推流列表页等原生广告，以及广点通、穿山甲等第三方联盟请求。
 - **配置**: [Cainiao_AdBlock.plugin](https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/Cainiao_AdBlock.plugin)
 
