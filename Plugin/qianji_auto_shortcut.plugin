@@ -1,6 +1,6 @@
 #!name=钱迹自动记账网关 (直推云端版)
 #!desc=配合 iOS 快捷指令使用，拦截本地请求并调用云端 CF 大模型，解析后直接静默推送到钱迹云端，彻底告别封号与弹窗。
-#!author=ykybl0039
+#!author=ykybl0040
 #!homepage=https://github.com/ykybl/Loon
 #!icon=https://raw.githubusercontent.com/ykybl/Loon/main/Icon/qianji.png
 
@@ -17,5 +17,7 @@ http-request ^https:\/\/api\.qianjiapp\.com\/hijack_add_bill script-path=https:/
 hostname = api.qianjiapp.com
 
 [Rule]
-# 强制让 Cloudflare 绑定的自建域名直连，排除因为科学上网代理节点不稳定导致的 POST 请求被阻断超时
+# ★★★ workers.dev 在中国大陆被 GFW 完全封锁，必须走代理节点！★★★
+DOMAIN-SUFFIX,workers.dev,PROXY
+# 旧的自定义域名规则（备用）
 DOMAIN-SUFFIX,qianji.renflyp.dpdns.org,DIRECT
