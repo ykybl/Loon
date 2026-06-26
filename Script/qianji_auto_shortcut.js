@@ -6,7 +6,7 @@
  * 2. 拦截虚拟请求 hijack_add_bill 返回凭证及配置信息，由快捷指令请求 CF Worker 进行无状态的 AI 解析；
  * 3. 拦截虚拟请求 auto_push_bill 接收 AI 解析结果，在本地进行模糊匹配并全新生成 reqidv2，最后通过 $httpClient 从手机本机 IP 直推钱迹云端。
  * 
- * 作者：ykybl0003
+ * 作者：ykybl0054
  */
 
 const url = ($request && $request.url) ? $request.url : "";

@@ -1,20 +1,20 @@
 #!name=钱迹自动记账网关 (直推云端版)
 #!desc=配合 iOS 快捷指令使用，拦截本地请求并调用云端 CF 大模型，解析后直接在手机本机静默推送到钱迹云端，彻底解决异地 IP 设备异常报错。
-#!author=ykybl0003
+#!author=ykybl0054
 #!homepage=https://github.com/ykybl/Loon
 #!icon=https://raw.githubusercontent.com/ykybl/Loon/main/Icon/qianji.png
 
 [Script]
 # 监听官方接口，被动抓取最新的 Token 和资产分类数据
-http-request ^https:\/\/api\.qianjiapp\.com\/(syncv2\/|category\/list|asset\/list) script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0005, requires-body=false, tag=钱迹凭证抓取
+http-request ^https:\/\/api\.qianjiapp\.com\/(syncv2\/|category\/list|asset\/list) script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0006, requires-body=false, tag=钱迹凭证抓取
 
-http-response ^https:\/\/api\.qianjiapp\.com\/(category\/list|asset\/list) script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0005, requires-body=true, tag=钱迹分类数据抓取
+http-response ^https:\/\/api\.qianjiapp\.com\/(category\/list|asset\/list) script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0006, requires-body=true, tag=钱迹分类数据抓取
 
 # 拦截快捷指令的虚拟网关请求，返回 Token 凭证（不读取 body，防止大图片导致 OOM）
-http-request ^https:\/\/api\.qianjiapp\.com\/hijack_add_bill script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0005, requires-body=false, timeout=120, tag=钱迹凭证提取
+http-request ^https:\/\/api\.qianjiapp\.com\/hijack_add_bill script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0006, requires-body=false, timeout=120, tag=钱迹凭证提取
 
 # 拦截快捷指令的本地推送请求，解析 bill，匹配后执行本地 HTTP POST 推送
-http-request ^https:\/\/api\.qianjiapp\.com\/auto_push_bill script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0005, requires-body=true, timeout=30, tag=钱迹本地直推
+http-request ^https:\/\/api\.qianjiapp\.com\/auto_push_bill script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0006, requires-body=true, timeout=30, tag=钱迹本地直推
 
 [MitM]
 hostname = api.qianjiapp.com
