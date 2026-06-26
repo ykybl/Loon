@@ -34,7 +34,7 @@
 * 钱迹 OCR 请求劫持 - 用于转发请求到自建云端
 
 ### 5. 钱迹自动记账网关 (直推云端版) - 最新黑科技！
-- **功能**: 绕过快捷指令 VIP 限制，本地抓包静默推云端。**最新更新**：采用了 307 临时重定向黑科技技术，直接穿透了 Loon 拦截巨大图片时导致内存爆满无法发出请求的限制，并彻底修复了 Cloudflare 多节点下 Token 丢失的 Isolate 问题！
+- **功能**: 绕过快捷指令 VIP 限制，本地抓包静默推云端。**最新更新 (V1.6)**：采用了“CF Worker当解析大脑，手机Loon当物理执行手”的重构方案，将最终的 `syncall` 推送移至手机本机执行，自动进行资产分类模糊匹配并生成防重放 `reqidv2`。彻底解决 Cloudflare 数据中心 IP 异地推送引发的 `ec:8888` 设备异常报错，实现安全、无感、纯本机的静默记账！
 - **订阅链接**: `https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_auto_shortcut.plugin`
 
 ### 6. 菜鸟去广告净化 (Cainiao_AdBlock)
