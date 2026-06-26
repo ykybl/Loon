@@ -109,7 +109,7 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
     const aiApiUrl = "https://qianji-auto-bill.ykybl.workers.dev/";
     const cfRequest = {
         url: aiApiUrl,
-        // timeout: 60, // 移除脚本级 timeout 参数，防止 Loon 底层解析不支持导致抛出 null 错误
+        timeout: 60, // 强制 Loon 等待 60 秒（单位通常是秒），这是破除主动超时的最关键参数
         headers: { 
             "Content-Type": "application/json",
             "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1" // 伪装合法 UA，防止 CF WAF 阻断
