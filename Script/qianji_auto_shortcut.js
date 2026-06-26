@@ -3,7 +3,7 @@
  * 作用：绕过本地快捷指令的 VIP 限制与异常弹窗死锁。
  * 原理：拦截自定义本地请求，调用 CF 云端大模型，然后使用保存的官方 Token 直接向钱迹服务器静默写入账单！
  * 
- * 作者：ykybl0040
+ * 作者：ykybl0041
  */
 
 const url = ($request && $request.url) ? $request.url : "";
@@ -106,7 +106,7 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
     });
 
     // 2. 发往 Cloudflare 自己的 AI 进行解析
-    const aiApiUrl = "https://qianji-auto-bill.ykybl.workers.dev/";
+    const aiApiUrl = "https://qianji.renflyp.dpdns.org/";
     // 极致净化发往云端的 Header 载荷，只保留核心鉴权 Token
     // 防止因将全量数十个 Header (含巨量无用 Cookie) 传给 CF 导致直接被其防火墙当作恶意载荷 TCP 截断
     const cleanAuthHeaders = {};
