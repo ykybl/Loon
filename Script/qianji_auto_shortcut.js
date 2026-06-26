@@ -74,16 +74,13 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
         return;
     }
 
-    let tok = authHeaders["tok"] || "";
-    let cookie = authHeaders["Cookie"] || authHeaders["cookie"] || "";
-
     // ★ 核心：返回凭证 JSON 给快捷指令，由快捷指令自行构建第二个请求直连 CF Worker
+    // 我们将整个 authHeaders 转换为 JSON 并带在 URL 上，确保不会丢失 reqidv2 等关键鉴权信息
+    const authHeadersStr = JSON.stringify(authHeaders);
     const tokenPayload = {
         success: true,
         uid: qianjiUid,
-        tok: tok,
-        cookie: cookie,
-        worker_url: `https://qianji.renflyp.dpdns.org/?uid=${encodeURIComponent(qianjiUid)}&tok=${encodeURIComponent(tok)}&cookie=${encodeURIComponent(cookie)}`
+        worker_url: `https://qianji.renflyp.dpdns.org/?uid=${encodeURIComponent(qianjiUid)}&auth=${encodeURIComponent(authHeadersStr)}`
     };
 
     $done({
