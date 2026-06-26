@@ -11,7 +11,7 @@ http-request ^https:\/\/api\.qianjiapp\.com\/(syncv2\/|category\/list|asset\/lis
 http-response ^https:\/\/api\.qianjiapp\.com\/(category\/list|asset\/list) script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js, requires-body=true, tag=钱迹分类数据抓取
 
 # 拦截快捷指令的虚拟网关请求并代工执行
-http-request ^https:\/\/api\.qianjiapp\.com\/hijack_add_bill script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js, requires-body=true, timeout=120, tag=钱迹云端AI代工
+http-request ^https:\/\/api\.qianjiapp\.com\/hijack_add_bill script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js, requires-body=false, timeout=120, tag=钱迹云端AI代工
 
 [MitM]
 hostname = api.qianjiapp.com
