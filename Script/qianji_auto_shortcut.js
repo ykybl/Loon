@@ -5,7 +5,7 @@
  * 1. 拦截官方 API 自动抓取并更新本地 Token、资产列表和分类列表；
  * 2. 拦截虚拟请求 hijack_add_bill 返回凭证及配置信息，由快捷指令提供给云端 CF 进行解析与最终推送。
  * 
- * 作者：ykybl0055
+ * 作者：ykybl0059
  */
 
 const url = ($request && $request.url) ? $request.url : "";
@@ -59,47 +59,76 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
             response: { 
                 status: 200, 
                 headers: { "Content-Type": "application/json; charset=utf-8" },
-                body: JSON.stringify({ error: "缺失授权数据。请先打开一次钱迹App，下拉刷新一次列表，以便脚本抓取凭证" }) 
+                body: JSON.stringify({ success: false, error: "缺失授权数据。请先打开一次钱迹App，下拉刷新一次列表，以便脚本抓取凭证" }) 
             } 
         });
     } else {
-        const authHeaders = JSON.parse(headersStr);
-        const categories = categoriesStr ? JSON.parse(categoriesStr) : [];
-        const assets = assetsStr ? JSON.parse(assetsStr) : [];
+        let authHeaders = {};
+        let categories = [];
+        let assets = [];
+        let parseError = "";
 
-        let qianjiUid = "";
-        if (assets && assets.length > 0 && assets[0].userid) {
-            qianjiUid = assets[0].userid;
-        } else if (categories && categories.length > 0 && categories[0].userid) {
-            qianjiUid = categories[0].userid;
+        try {
+            authHeaders = JSON.parse(headersStr);
+        } catch (e) {
+            parseError += `解析 headers 失败: ${e.message}; `;
         }
 
-        if (!qianjiUid) {
-            $done({ 
-                response: { 
-                    status: 200, 
-                    headers: { "Content-Type": "application/json; charset=utf-8" },
-                    body: JSON.stringify({ error: "无法从您的本地资产中提取UID，请去钱迹里新建一个资产或分类后再试！" }) 
-                } 
-            });
-        } else {
-            // 返回包含全套凭证、资产、分类的 JSON 给快捷指令
-            const tokenPayload = {
-                success: true,
-                uid: qianjiUid,
-                auth_headers: authHeaders,
-                categories: categories,
-                assets: assets,
-                worker_url: "https://qianji.renflyp.dpdns.org"
-            };
+        try {
+            categories = categoriesStr ? JSON.parse(categoriesStr) : [];
+        } catch (e) {
+            parseError += `解析 categories 失败: ${e.message}; `;
+        }
 
+        try {
+            assets = assetsStr ? JSON.parse(assetsStr) : [];
+        } catch (e) {
+            parseError += `解析 assets 失败: ${e.message}; `;
+        }
+
+        if (parseError) {
             $done({
                 response: {
                     status: 200,
                     headers: { "Content-Type": "application/json; charset=utf-8" },
-                    body: JSON.stringify(tokenPayload)
+                    body: JSON.stringify({ success: false, error: `凭证解析失败: ${parseError}` })
                 }
             });
+        } else {
+            let qianjiUid = "";
+            if (assets && assets.length > 0 && assets[0].userid) {
+                qianjiUid = assets[0].userid;
+            } else if (categories && categories.length > 0 && categories[0].userid) {
+                qianjiUid = categories[0].userid;
+            }
+
+            if (!qianjiUid) {
+                $done({ 
+                    response: { 
+                        status: 200, 
+                        headers: { "Content-Type": "application/json; charset=utf-8" },
+                        body: JSON.stringify({ success: false, error: "无法从您的本地资产中提取UID，请去钱迹里新建一个资产或分类后再试！" }) 
+                    } 
+                });
+            } else {
+                // 返回包含全套凭证、资产、分类的 JSON 给快捷指令
+                const tokenPayload = {
+                    success: true,
+                    uid: qianjiUid,
+                    auth_headers: authHeaders,
+                    categories: categories,
+                    assets: assets,
+                    worker_url: "https://qianji.renflyp.dpdns.org"
+                };
+
+                $done({
+                    response: {
+                        status: 200,
+                        headers: { "Content-Type": "application/json; charset=utf-8" },
+                        body: JSON.stringify(tokenPayload)
+                    }
+                });
+            }
         }
     }
 } else {
