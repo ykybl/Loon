@@ -142,7 +142,7 @@ else if (url.includes("api.qianjiapp.com/auto_push_bill.txt")) {
     try {
         reqBody = JSON.parse($request.body);
     } catch(e) {
-        $done({ response: { status: 400, body: JSON.stringify({ success: false, error: "请求体不是合法的 JSON" }) }});
+        $done({ response: { status: 400, headers: { "Content-Type": "text/plain; charset=utf-8" }, body: "请求体不是合法的 JSON。详细错误: " + e.message + "。请检查快捷指令的请求方式是否不小心变回了 GET，或者请求体是否为空！" }});
     }
 
     const workerUrl = reqBody.worker_url;
