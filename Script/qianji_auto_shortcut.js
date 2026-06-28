@@ -151,12 +151,14 @@ else if (url.includes("api.qianjiapp.com/get_token.json")) {
     let assets = [];
     let qianjiUid = "";
 
-    try { authHeaders = JSON.parse(headersStr); } catch(e) {}
-    try { categories = categoriesStr ? JSON.parse(categoriesStr) : []; } catch(e) {}
-    try { assets = assetsStr ? JSON.parse(assetsStr) : []; } catch(e) {}
+    try { authHeaders = JSON.parse(headersStr); } catch(e) { authHeaders = {}; }
+    try { categories = categoriesStr ? JSON.parse(categoriesStr) : []; } catch(e) { categories = []; }
+    try { assets = assetsStr ? JSON.parse(assetsStr) : []; } catch(e) { assets = []; }
 
-    if (authHeaders["Userid"]) qianjiUid = authHeaders["Userid"];
-    else if (authHeaders["userid"]) qianjiUid = authHeaders["userid"];
+    try {
+        if (authHeaders && authHeaders["Userid"]) qianjiUid = authHeaders["Userid"];
+        else if (authHeaders && authHeaders["userid"]) qianjiUid = authHeaders["userid"];
+    } catch(e) {}
 
     const responsePayload = {
         success: true,
