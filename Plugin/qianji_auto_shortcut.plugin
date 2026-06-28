@@ -1,22 +1,22 @@
 #!name=钱迹 AI 自动记账核心 (云端代工版)
 #!desc=拦截官方API抓取资产/分类凭证供云端 CF 解析使用，并拦截快捷指令请求注入凭证。
-#!author=ykybl0061
+#!author=ykybl0062
 #!homepage=https://github.com/
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Aira.png
-#!date=2026-06-28 10:57:00
-#!version=v0010
+#!date=2026-06-28 11:02:00
+#!version=v0011
 
 [Script]
-# 监听官方接口，被动抓取最新的 Token 和资产分类数据
-http-request ^https:\/\/api\.qianjiapp\.com\/(syncv2\/|category\/list|asset\/list) script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0010, requires-body=false, tag=钱迹凭证抓取
+# 监听官方接口，被动抓取最新的 Token
+http-request ^https:\/\/api\.qianjiapp\.com\/ script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0011, requires-body=false, tag=钱迹凭证抓取
 
-http-response ^https:\/\/api\.qianjiapp\.com\/(category\/list|asset\/list) script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0010, requires-body=true, tag=钱迹分类数据抓取
+http-response ^https:\/\/api\.qianjiapp\.com\/(category\/list|asset\/list) script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0011, requires-body=true, tag=钱迹分类数据抓取
 
 # 拦截快捷指令的虚拟网关请求，返回 Token 凭证（不读取 body，防止大图片导致 OOM）
-http-request ^https:\/\/api\.qianjiapp\.com\/hijack_add_bill script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0009, requires-body=false, timeout=120, tag=钱迹凭证提取
+http-request ^https:\/\/api\.qianjiapp\.com\/hijack_add_bill script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0011, requires-body=false, timeout=120, tag=钱迹凭证提取
 
 # 拦截快捷指令的终极直推请求，自动注入本地凭证并转发给 CF (需读取 body 以获取 bill JSON)
-http-request ^https:\/\/api\.qianjiapp\.com\/auto_push_bill script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0010, requires-body=true, timeout=120, tag=钱迹自动注入直推
+http-request ^https:\/\/api\.qianjiapp\.com\/auto_push_bill script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0011, requires-body=true, timeout=120, tag=钱迹自动注入直推
 
 
 [MitM]
