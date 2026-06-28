@@ -13,14 +13,13 @@ const url = ($request && $request.url) ? $request.url : "";
 // ==========================================
 // 模块 1：被动抓取并更新身份凭证（运行在钱迹 App 内时）
 // ==========================================
-if (url.includes("api.qianjiapp.com") && !url.includes("api.qianjiapp.com/hijack_add_bill")) {
+if (url.includes("api.qianjiapp.com") && !url.includes("api.qianjiapp.com/hijack_add_bill") && !url.includes("api.qianjiapp.com/auto_push_bill")) {
     
-    if (url.includes("/category/list") || url.includes("/asset/list") || url.includes("/syncv2/pull")) {
-        let authHeaders = $request.headers;
-        if (authHeaders["tok"]) authHeaders["tok"] = authHeaders["tok"];
-        if (authHeaders["reqidv2"]) authHeaders["reqidv2"] = authHeaders["reqidv2"];
-        
+    // 只要是正常的钱迹 API 请求，都抓取其 Headers 中的 Token
+    let authHeaders = $request.headers;
+    if (authHeaders["tok"] || authHeaders["Tok"]) {
         $persistentStore.write(JSON.stringify(authHeaders), "qianji_auth_headers");
+        console.log("钱迹：成功拦截最新请求并刷新本地 Token 凭证");
     }
 
     if ($response && $response.body) {
