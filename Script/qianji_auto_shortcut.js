@@ -192,13 +192,13 @@ else if (url.includes("api.qianjiapp.com/auto_push_bill")) {
     }, function(error, response, data) {
         if (error) {
             console.log("钱迹：转发云端失败：" + JSON.stringify(error));
-            $done({ response: { status: 500, body: JSON.stringify({ success: false, error: "Loon 转发请求到 CF 失败", details: error }) }});
+            $done({ response: { status: 500, headers: { "Content-Type": "text/plain; charset=utf-8" }, body: "Loon 转发请求到 CF 失败: " + JSON.stringify(error) }});
         } else {
             console.log("钱迹：云端直推完成，返回结果给快捷指令：" + data);
             $done({
                 response: {
                     status: 200,
-                    headers: { "Content-Type": "application/json; charset=utf-8" },
+                    headers: { "Content-Type": "text/plain; charset=utf-8" },
                     body: data
                 }
             });
