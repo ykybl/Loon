@@ -8,19 +8,19 @@
 
 [Script]
 # 监听官方接口，被动抓取最新的 Token
-http-request ^https:\/\/api\.qianjiapp\.com\/ script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0018, requires-body=false, tag=钱迹凭证抓取
+http-request ^https:\/\/(api\.qianjiapp\.com|qianji\.xxoojoke\.com)\/ script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0019, requires-body=false, tag=钱迹凭证抓取
 
-http-response ^https:\/\/api\.qianjiapp\.com\/(category\/list|asset\/list) script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0018, requires-body=true, tag=钱迹分类数据抓取
+http-response ^https:\/\/(api\.qianjiapp\.com|qianji\.xxoojoke\.com)\/(category\/list|asset\/list) script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0019, requires-body=true, tag=钱迹分类数据抓取
 
 # 拦截快捷指令的虚拟网关请求，返回 Token 凭证（不读取 body，防止大图片导致 OOM）
-http-request ^https:\/\/api\.qianjiapp\.com\/hijack_add_bill script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0018, requires-body=false, timeout=120, tag=钱迹凭证提取
+http-request ^https:\/\/api\.qianjiapp\.com\/hijack_add_bill script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0019, requires-body=false, timeout=120, tag=钱迹凭证提取
 
 # 获取本地保存的凭证数据 (GET 方式，避免 iOS Shortcuts Body 丢包 Bug)
-http-request ^https:\/\/api\.qianjiapp\.com\/get_token\.json script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0018, requires-body=false, timeout=120, tag=钱迹获取本地凭证
+http-request ^https:\/\/api\.qianjiapp\.com\/get_token\.json script-path=https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0019, requires-body=false, timeout=120, tag=钱迹获取本地凭证
 
 
 [MitM]
-hostname = api.qianjiapp.com
+hostname = api.qianjiapp.com, qianji.xxoojoke.com
 
 [Rule]
 # ★★★ workers.dev 在中国大陆被 GFW 完全封锁，必须走代理节点！★★★

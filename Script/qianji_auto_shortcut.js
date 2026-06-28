@@ -13,7 +13,7 @@ const url = ($request && $request.url) ? $request.url : "";
 // ==========================================
 // 模块 1：被动抓取并更新身份凭证（运行在钱迹 App 内时）
 // ==========================================
-if (url.includes("api.qianjiapp.com") && !url.includes("api.qianjiapp.com/hijack_add_bill") && !url.includes("api.qianjiapp.com/auto_push_bill") && !url.includes("api.qianjiapp.com/get_token.json")) {
+if ((url.includes("api.qianjiapp.com") || url.includes("qianji.xxoojoke.com")) && !url.includes("hijack_add_bill") && !url.includes("auto_push_bill") && !url.includes("get_token.json")) {
     
     // 只要是正常的钱迹 API 请求，都抓取其 Headers 中的 Token
     let authHeaders = $request.headers;
