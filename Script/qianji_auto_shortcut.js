@@ -143,13 +143,15 @@ else if (url.includes("api.qianjiapp.com/auto_push_bill.txt")) {
         reqBody = JSON.parse($request.body);
     } catch(e) {
         $done({ response: { status: 400, headers: { "Content-Type": "text/plain; charset=utf-8" }, body: "请求体不是合法的 JSON。详细错误: " + e.message + "。请检查快捷指令的请求方式是否不小心变回了 GET，或者请求体是否为空！" }});
+        return;
     }
 
     const workerUrl = reqBody.worker_url;
     const billData = reqBody.bill;
 
     if (!workerUrl || !billData) {
-        $done({ response: { status: 400, body: JSON.stringify({ success: false, error: "请求体缺失 worker_url 或 bill 参数" }) }});
+        $done({ response: { status: 400, headers: { "Content-Type": "text/plain; charset=utf-8" }, body: "请求体缺失 worker_url 或 bill 参数" }});
+        return;
     }
 
     // 2. 读取本地持久化凭证
@@ -158,19 +160,22 @@ else if (url.includes("api.qianjiapp.com/auto_push_bill.txt")) {
     const assetsStr = $persistentStore.read("qianji_assets");
 
     if (!headersStr) {
-        $done({ response: { status: 400, body: JSON.stringify({ success: false, error: "缺失授权数据。请先打开一次钱迹App刷新列表。" }) }});
+        $done({ response: { status: 400, headers: { "Content-Type": "text/plain; charset=utf-8" }, body: "缺失授权数据。请先打开一次钱迹App刷新列表。" }});
+        return;
     }
 
     let authHeaders = {};
     let categories = [];
     let assets = [];
+    let qianjiUid = "";
+
     try { authHeaders = JSON.parse(headersStr); } catch(e) {}
     try { categories = categoriesStr ? JSON.parse(categoriesStr) : []; } catch(e) {}
     try { assets = assetsStr ? JSON.parse(assetsStr) : []; } catch(e) {}
 
-    let qianjiUid = "";
-    if (assets && assets.length > 0 && assets[0].userid) qianjiUid = assets[0].userid;
-    else if (categories && categories.length > 0 && categories[0].userid) qianjiUid = categories[0].userid;
+    // 如果凭证里有 userid 就提取出来
+    if (authHeaders["Userid"]) qianjiUid = authHeaders["Userid"];
+    else if (authHeaders["userid"]) qianjiUid = authHeaders["userid"];
 
     // 3. 组装最终推给 CF 的数据
     const finalPayload = {
@@ -194,11 +199,15 @@ else if (url.includes("api.qianjiapp.com/auto_push_bill.txt")) {
             $done({ response: { status: 500, headers: { "Content-Type": "text/plain; charset=utf-8" }, body: "Loon 转发请求到 CF 失败: " + JSON.stringify(error) }});
         } else {
             console.log("钱迹：云端直推完成，返回结果给快捷指令：" + data);
+            let finalData = data;
+            if (finalData && finalData.includes("verify failed")) {
+                finalData += "\n\n[Loon 调试] 当前拦截保存的凭证内容为: " + headersStr;
+            }
             $done({
                 response: {
                     status: 200,
                     headers: { "Content-Type": "text/plain; charset=utf-8" },
-                    body: data
+                    body: finalData
                 }
             });
         }
