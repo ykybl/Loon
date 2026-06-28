@@ -6,12 +6,16 @@
 
 [Script]
 # 监听官方接口，被动抓取最新的 Token 和资产分类数据
-http-request ^https:\/\/api\.qianjiapp\.com\/(syncv2\/|category\/list|asset\/list) script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0008, requires-body=false, tag=钱迹凭证抓取
+http-request ^https:\/\/api\.qianjiapp\.com\/(syncv2\/|category\/list|asset\/list) script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0009, requires-body=false, tag=钱迹凭证抓取
 
-http-response ^https:\/\/api\.qianjiapp\.com\/(category\/list|asset\/list) script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0008, requires-body=true, tag=钱迹分类数据抓取
+http-response ^https:\/\/api\.qianjiapp\.com\/(category\/list|asset\/list) script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0009, requires-body=true, tag=钱迹分类数据抓取
 
 # 拦截快捷指令的虚拟网关请求，返回 Token 凭证（不读取 body，防止大图片导致 OOM）
-http-request ^https:\/\/api\.qianjiapp\.com\/hijack_add_bill script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0008, requires-body=false, timeout=120, tag=钱迹凭证提取
+http-request ^https:\/\/api\.qianjiapp\.com\/hijack_add_bill script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0009, requires-body=false, timeout=120, tag=钱迹凭证提取
+
+# 拦截快捷指令的终极直推请求，自动注入本地凭证并转发给 CF (需读取 body 以获取 bill JSON)
+http-request ^https:\/\/api\.qianjiapp\.com\/auto_push_bill script-path=https://ghproxy.net/https://raw.githubusercontent.com/ykybl/Loon/main/Script/qianji_auto_shortcut.js?v=0009, requires-body=true, timeout=120, tag=钱迹自动注入直推
+
 
 [MitM]
 hostname = api.qianjiapp.com

@@ -131,6 +131,79 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
             }
         }
     }
+}
+// ==========================================
+// 模块 3：拦截终极直推请求，自动注入本地凭证并转发给 CF
+// ==========================================
+else if (url.includes("api.qianjiapp.com/auto_push_bill")) {
+    console.log("钱迹：收到快捷指令终极推送请求，正在自动注入凭证并发往云端...");
+    
+    // 1. 读取快捷指令发来的 body，获取 worker_url 和 bill
+    let reqBody = {};
+    try {
+        reqBody = JSON.parse($request.body);
+    } catch(e) {
+        $done({ response: { status: 400, body: JSON.stringify({ success: false, error: "请求体不是合法的 JSON" }) }});
+    }
+
+    const workerUrl = reqBody.worker_url;
+    const billData = reqBody.bill;
+
+    if (!workerUrl || !billData) {
+        $done({ response: { status: 400, body: JSON.stringify({ success: false, error: "请求体缺失 worker_url 或 bill 参数" }) }});
+    }
+
+    // 2. 读取本地持久化凭证
+    const headersStr = $persistentStore.read("qianji_auth_headers");
+    const categoriesStr = $persistentStore.read("qianji_categories");
+    const assetsStr = $persistentStore.read("qianji_assets");
+
+    if (!headersStr) {
+        $done({ response: { status: 400, body: JSON.stringify({ success: false, error: "缺失授权数据。请先打开一次钱迹App刷新列表。" }) }});
+    }
+
+    let authHeaders = {};
+    let categories = [];
+    let assets = [];
+    try { authHeaders = JSON.parse(headersStr); } catch(e) {}
+    try { categories = categoriesStr ? JSON.parse(categoriesStr) : []; } catch(e) {}
+    try { assets = assetsStr ? JSON.parse(assetsStr) : []; } catch(e) {}
+
+    let qianjiUid = "";
+    if (assets && assets.length > 0 && assets[0].userid) qianjiUid = assets[0].userid;
+    else if (categories && categories.length > 0 && categories[0].userid) qianjiUid = categories[0].userid;
+
+    // 3. 组装最终推给 CF 的数据
+    const finalPayload = {
+        bill: billData,
+        payload: {
+            uid: qianjiUid,
+            auth_headers: authHeaders,
+            categories: categories,
+            assets: assets
+        }
+    };
+
+    // 4. 使用 Loon 的 HttpClient 发起真正的推送请求
+    $httpClient.post({
+        url: workerUrl,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(finalPayload)
+    }, function(error, response, data) {
+        if (error) {
+            console.log("钱迹：转发云端失败：" + JSON.stringify(error));
+            $done({ response: { status: 500, body: JSON.stringify({ success: false, error: "Loon 转发请求到 CF 失败", details: error }) }});
+        } else {
+            console.log("钱迹：云端直推完成，返回结果给快捷指令：" + data);
+            $done({
+                response: {
+                    status: 200,
+                    headers: { "Content-Type": "application/json; charset=utf-8" },
+                    body: data
+                }
+            });
+        }
+    });
 } else {
     $done({});
 }
