@@ -5,7 +5,7 @@
  * 1. 拦截官方 API 自动抓取并更新本地 Token、资产列表和分类列表；
  * 2. 拦截虚拟请求 hijack_add_bill 返回凭证及配置信息，由快捷指令提供给云端 CF 进行解析与最终推送。
  * 
- * 作者：ykybl0059
+ * 作者：ykybl0069
  */
 
 const url = ($request && $request.url) ? $request.url : "";
