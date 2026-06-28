@@ -33,9 +33,14 @@
 - **功能**: 拦截* 钱迹本地 VIP 解锁 - 适配 v5.5.5+
 * 钱迹 OCR 请求劫持 - 用于转发请求到自建云端
 
-### 5. 钱迹自动记账网关 (直推云端版) - 最新黑科技！
-- **功能**: 绕过快捷指令 VIP 限制，本地抓包静默推云端。**最新更新 (V1.7)**：支持一站式或分步式的“AI云端解析 + 云端直推”架构。预留了手机端审查校准 AI 提取数据的接口，极大简化了快捷指令配置，安全、可靠、直推云端！
-- **订阅链接**: `https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_auto_shortcut.plugin`
+### 5. 钱迹 AI 自动记账核心 (云端代工版)
+**版本**：`v0017`
+**功能说明**：
+- 自动拦截钱迹官方 API（`/api/asset/list`、`/api/category/list`），抓取并持久化保存 Token 凭证及资产分类数据。
+- 拦截特定虚拟网关（`/hijack_add_bill`）提取凭证数据供外部快捷指令使用。
+- **[v0017 新特性]** 完美适配 iOS 快捷指令的请求体丢失 Bug，提供 `/get_token.json` 接口直接返回 JSON 格式的 Token 凭证，配合 Cloudflare Worker 实现最稳定的双步推流直达钱迹服务器！
+
+**订阅链接**: `https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/qianji_auto_shortcut.plugin`
 
 ### 6. 菜鸟去广告净化 (Cainiao_AdBlock)
 - **功能**: 拦截菜鸟 APP 内开屏广告、物流详情横幅、推流列表页等原生广告，以及广点通、穿山甲等第三方联盟请求。
