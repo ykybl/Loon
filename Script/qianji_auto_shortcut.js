@@ -135,7 +135,7 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
 // ==========================================
 // 模块 3：拦截终极直推请求，自动注入本地凭证并转发给 CF
 // ==========================================
-else if (url.includes("api.qianjiapp.com/auto_push_bill")) {
+else if (url.includes("api.qianjiapp.com/auto_push_bill.txt")) {
     console.log("钱迹：收到快捷指令终极推送请求，正在自动注入凭证并发往云端...");
     
     // 1. 读取快捷指令发来的 body，获取 worker_url 和 bill
