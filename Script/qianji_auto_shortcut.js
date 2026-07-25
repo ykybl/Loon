@@ -48,7 +48,7 @@ if ((url.includes("api.qianjiapp.com") || url.includes("qianji.xxoojoke.com")) &
 // 模块 2：拦截快捷指令的虚拟请求，返回 Token 凭证
 // ==========================================
 else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
-    console.log("钱迹：收到快捷指令凭证请求，提取本地 Token 并返回...");
+    console.log("钱迹：收到快捷指令凭证请求，正在实时刷新 Token...");
     const headersStr = $persistentStore.read("qianji_auth_headers");
     const categoriesStr = $persistentStore.read("qianji_categories");
     const assetsStr = $persistentStore.read("qianji_assets");
@@ -67,68 +67,93 @@ else if (url.includes("api.qianjiapp.com/hijack_add_bill")) {
         let assets = [];
         let parseError = "";
 
-        try {
-            authHeaders = JSON.parse(headersStr);
-        } catch (e) {
-            parseError += `解析 headers 失败: ${e.message}; `;
-        }
-
-        try {
-            categories = categoriesStr ? JSON.parse(categoriesStr) : [];
-        } catch (e) {
-            parseError += `解析 categories 失败: ${e.message}; `;
-        }
-
-        try {
-            assets = assetsStr ? JSON.parse(assetsStr) : [];
-        } catch (e) {
-            parseError += `解析 assets 失败: ${e.message}; `;
-        }
+        try { authHeaders = JSON.parse(headersStr); } catch (e) { parseError += `解析 headers 失败: ${e.message}; `; }
+        try { categories = categoriesStr ? JSON.parse(categoriesStr) : []; } catch (e) { parseError += `解析 categories 失败: ${e.message}; `; }
+        try { assets = assetsStr ? JSON.parse(assetsStr) : []; } catch (e) { parseError += `解析 assets 失败: ${e.message}; `; }
 
         if (parseError) {
+            $done({ response: { status: 200, headers: { "Content-Type": "application/json; charset=utf-8" }, body: JSON.stringify({ success: false, error: `凭证解析失败: ${parseError}` }) } });
+            return;
+        }
+
+        let qianjiUid = "";
+        if (assets && assets.length > 0 && assets[0].userid) qianjiUid = assets[0].userid;
+        else if (categories && categories.length > 0 && categories[0].userid) qianjiUid = categories[0].userid;
+
+        if (!qianjiUid) {
+            $done({ response: { status: 200, headers: { "Content-Type": "application/json; charset=utf-8" }, body: JSON.stringify({ success: false, error: "无法从您的本地资产中提取UID，请去钱迹里新建一个资产或分类后再试！" }) } });
+            return;
+        }
+
+        // ============================================================
+        // 关键修复：实时向服务器发一次 syncv2/pull 请求来刷新 tok
+        // tok 是服务器签发的有时效 Session Token，缓存的旧 tok 会失效
+        // ============================================================
+        const targetHost = authHeaders["host"] || authHeaders["Host"] || "qianji.xxoojoke.com";
+        const pullUrl = `https://${targetHost}/syncv2/pull`;
+
+        // 构建 pull 请求的 headers（复用缓存的 headers，但 tok 和 reqidv2 由服务器赋予新值）
+        const freshPullHeaders = Object.assign({}, authHeaders);
+        // 生成新的随机 reqidv2（pull 不需要签名校验，随机即可）
+        function genHex32() {
+            let r = "";
+            const c = "0123456789abcdef";
+            for (let i = 0; i < 32; i++) r += c[Math.floor(Math.random() * c.length)];
+            return r;
+        }
+        freshPullHeaders["reqidv2"] = genHex32();
+        freshPullHeaders["act"] = "pull";
+        freshPullHeaders["ctrl"] = "syncv2";
+        freshPullHeaders["Content-Type"] = "application/x-www-form-urlencoded";
+        delete freshPullHeaders["content-length"];
+        delete freshPullHeaders["Content-Length"];
+        delete freshPullHeaders["host"];
+        delete freshPullHeaders["Host"];
+
+        const pullBody = "uid=" + encodeURIComponent(qianjiUid) + "&fr=" + encodeURIComponent(qianjiUid) + "&v=%7B%22syncv2%22%3A%7B%22changelist%22%3A%22%5B%5D%22%7D%7D";
+
+        $httpClient.post({
+            url: pullUrl,
+            headers: freshPullHeaders,
+            body: pullBody
+        }, function(error, response, data) {
+            let freshAuthHeaders = authHeaders; // 降级：若刷新失败则用旧 headers
+
+            if (!error && response && response.headers) {
+                // 从响应 headers 中提取服务器返回的新 tok
+                const respHeaders = response.headers;
+                const newTok = respHeaders["tok"] || respHeaders["Tok"] || respHeaders["TOK"];
+                if (newTok) {
+                    console.log("钱迹：成功刷新 tok: " + newTok);
+                    freshAuthHeaders = Object.assign({}, authHeaders);
+                    freshAuthHeaders["tok"] = newTok;
+                    freshAuthHeaders["Tok"] = newTok;
+                    // 同时存储最新的 headers 供下次使用
+                    $persistentStore.write(JSON.stringify(freshAuthHeaders), "qianji_auth_headers");
+                } else {
+                    console.log("钱迹：pull 响应中没有 tok header，使用缓存凭证。响应体: " + data);
+                }
+            } else {
+                console.log("钱迹：pull 刷新失败，使用缓存凭证。error=" + JSON.stringify(error));
+            }
+
+            const tokenPayload = {
+                success: true,
+                uid: qianjiUid,
+                auth_headers: freshAuthHeaders,
+                categories: categories,
+                assets: assets,
+                worker_url: "https://qianji.renflyp.dpdns.org"
+            };
+
             $done({
                 response: {
                     status: 200,
                     headers: { "Content-Type": "application/json; charset=utf-8" },
-                    body: JSON.stringify({ success: false, error: `凭证解析失败: ${parseError}` })
+                    body: JSON.stringify(tokenPayload)
                 }
             });
-        } else {
-            let qianjiUid = "";
-            if (assets && assets.length > 0 && assets[0].userid) {
-                qianjiUid = assets[0].userid;
-            } else if (categories && categories.length > 0 && categories[0].userid) {
-                qianjiUid = categories[0].userid;
-            }
-
-            if (!qianjiUid) {
-                $done({ 
-                    response: { 
-                        status: 200, 
-                        headers: { "Content-Type": "application/json; charset=utf-8" },
-                        body: JSON.stringify({ success: false, error: "无法从您的本地资产中提取UID，请去钱迹里新建一个资产或分类后再试！" }) 
-                    } 
-                });
-            } else {
-                // 返回包含全套凭证、资产、分类的 JSON 给快捷指令
-                const tokenPayload = {
-                    success: true,
-                    uid: qianjiUid,
-                    auth_headers: authHeaders,
-                    categories: categories,
-                    assets: assets,
-                    worker_url: "https://qianji.renflyp.dpdns.org"
-                };
-
-                $done({
-                    response: {
-                        status: 200,
-                        headers: { "Content-Type": "application/json; charset=utf-8" },
-                        body: JSON.stringify(tokenPayload)
-                    }
-                });
-            }
-        }
+        });
     }
 }
 // ==========================================

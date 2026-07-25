@@ -32,9 +32,9 @@
 - **订阅链接**: `https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/Cainiao_AdBlock.plugin`
 
 ### 5. 华为运动健康 GT5 个人表盘解锁 (HWHealth_WatchFace)
-- **功能**: 解锁华为运动健康 App 中 GT5 等手表的自定义/个人表盘上传与使用权限，解锁表盘服务相关限制。
+- **功能**: 解锁华为运动健康 App 中 GT5 等手表的自定义/个人表盘上传与使用权限，解锁表盘服务相关限制，并提供全量商店表盘的 VIP 免付费零元下载。
 - **订阅链接**: `https://raw.githubusercontent.com/ykybl/Loon/main/Plugin/HWHealth_WatchFace.plugin`
-- **重要提示**: 必须配置 MITM 并解密 `*.hicloud.com`, `*.dbankcloud.cn`, `*.dbankcdn.cn` 域名。
+- **重要提示**: 必须配置 MITM 并解密 `*.hicloud.com`, `*.dbankcloud.cn`, `*.dbankcdn.cn`, `api-drcn.theme.dbankcloud.cn`, `query.hicloud.com` 等域名。
 
 ## 使用说明
 

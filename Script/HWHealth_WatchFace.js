@@ -1,12 +1,13 @@
 /**
- * 华为运动健康 GT5 个人表盘与 VIP 会员表盘解锁脚本
- * 作者: ykybl0001
- * 版本: 1.1.0
+ * 华为运动健康 GT5 个人表盘与 VIP 会员全量表盘解锁脚本
+ * 作者: ykybl0002
+ * 版本: 1.3.0
  * 
  * 功能:
- * 1. 解锁个人/自定义表盘权限 (personalWatchface)
- * 2. 解锁表盘会员订阅状态 (memberStatus = 1, validDate = 2099)
- * 3. 将收费表盘列表价格全量修改为 0.00 / 免费 (isFree, feeType = 0)
+ * 1. 深度锁定 VIP 会员订阅 (memberStatus = "1", renewFlag = "1", validDate = 2099)
+ * 2. 解锁个人/自定义表盘权限 (personalWatchface = true)
+ * 3. 拦截全量付费表盘列表，将价格修改为 0.00，免费类型设为通用免费 (contentPrivType = "1", feeType = "0")
+ * 4. 拦截下单与支付 API (OrderAdd)，直接伪造支付成功响应
  */
 
 const url = $request.url;
@@ -36,14 +37,14 @@ function deepUnlock(obj, path = '') {
     
     const lowerKey = key.toLowerCase();
     
-    // 1. 会员状态修改
+    // 1. 会员状态强改
     if (lowerKey === 'memberstatus') {
       console.log(`[HWWatchFace] 👑 修改会员状态 ${currentPath}: ${value} → "1"`);
       obj[key] = '1';
       continue;
     }
-    if (lowerKey === 'hadrenewvip') {
-      obj[key] = '1';
+    if (lowerKey === 'hadrenewvip' || lowerKey === 'isvip' || lowerKey === 'vipstatus') {
+      obj[key] = typeof value === 'boolean' ? true : (typeof value === 'number' ? 1 : '1');
       continue;
     }
     
@@ -114,67 +115,151 @@ function fixDeviceList(obj) {
 }
 
 // ============================================================
-// 🚀 主逻辑
+// 🚀 主逻辑入口
 // ============================================================
 
 let body = $response.body;
 console.log(`[HWWatchFace] 拦截请求: ${url}`);
 
+// 简单的 Base64 工具，防止 Loon 缺少 atob/btoa 或遇到中文乱码
+const B64 = {
+  decode: function(s) {
+    if (typeof atob === 'function') return decodeURIComponent(escape(atob(s)));
+    // fallback 简单实现
+    return s; // 如果没有 atob 可能会失败，但 Loon 环境通常支持 atob
+  },
+  encode: function(s) {
+    if (typeof btoa === 'function') return btoa(unescape(encodeURIComponent(s)));
+    return s;
+  }
+};
+
+let isBase64 = false;
+
 try {
-  let obj = JSON.parse(body);
+  let obj = null;
+  // 判断是否是 base64
+  if (body && !body.trim().startsWith('{') && !body.trim().startsWith('[')) {
+    try {
+      body = B64.decode(body.trim());
+      isBase64 = true;
+      console.log(`[HWWatchFace] 识别到 Base64 响应并解码成功`);
+    } catch (e) {
+      console.log(`[HWWatchFace] Base64 解码失败: ${e}`);
+    }
+  }
+
+  obj = JSON.parse(body);
   
-  // 专项接口1：会员订阅 API
+  // 专项 1：表盘 VIP 会员订阅 API 强改 (修复产品 ID 被覆盖导致前端无法识别的问题)
   if (url.includes('/subscription/queryall')) {
-    console.log(`[HWWatchFace] 👑 触发表盘会员订阅 API 锁定强改`);
+    console.log(`[HWWatchFace] 👑 触发 VIP 订阅 API 强改 (queryall)`);
     obj.resultcode = "00000";
     obj.resultinfo = "success.";
-    obj.memberStatus = "1"; // 有效会员
+    obj.memberStatus = "1"; // ACTIVE_VIP (1 为有效会员)
     obj.hadRenewVip = "1";
     obj.expiredReminder = 0;
-    if (!obj.subInfo) obj.subInfo = {};
-    obj.subInfo.startDate = "2024-01-01 00:00:00";
-    obj.subInfo.validDate = "2099-12-31 23:59:59";
-    obj.subInfo.renewFlag = "1";
-    if (obj.subInfo.productInfo) {
-      obj.subInfo.productInfo.price = "0.00";
-      obj.subInfo.productInfo.canRenewFlag = "1";
+    obj.isYoung = "0";
+    obj.isRecycling = "0";
+    
+    const farDate = "2099-12-31 23:59:59";
+    const startDate = "2024-01-01 00:00:00";
+    
+    if (obj.subInfo) {
+      obj.subInfo.startDate = startDate;
+      obj.subInfo.validDate = farDate;
+      obj.subInfo.renewFlag = "1";
+      obj.subInfo.nextRenewTime = farDate;
+      if (obj.subInfo.productInfo) {
+        obj.subInfo.productInfo.price = "0.00";
+        obj.subInfo.productInfo.validDay = "36500";
+        obj.subInfo.productInfo.canRenewFlag = "1";
+        obj.subInfo.productInfo.discountPrice = "0.00";
+        obj.subInfo.productInfo.userType = "1"; // VIP 类型
+      }
+    }
+    
+    if (obj.renewInfo) {
+      obj.renewInfo.startDate = startDate;
+      obj.renewInfo.validDate = farDate;
+      obj.renewInfo.renewFlag = "1";
+      obj.renewInfo.nextRenewTime = farDate;
+      if (obj.renewInfo.productInfo) {
+        obj.renewInfo.productInfo.price = "0.00";
+        obj.renewInfo.productInfo.validDay = "36500";
+        obj.renewInfo.productInfo.canRenewFlag = "1";
+        obj.renewInfo.productInfo.userType = "1";
+      }
     }
   }
   
-  // 专项接口2：表盘/主题列表 API
-  if (url.includes('getThemeList.do') || url.includes('getMenu.do')) {
-    console.log(`[HWWatchFace] ⌚ 触发表盘列表价格修改`);
+  // 专项 2：表盘与主题列表、详情、过滤 API
+  if (url.includes('getThemeList') || url.includes('getMenu') || url.includes('getTrialList') || url.includes('getFilterResult') || url.includes('getDetailResourceInfo') || url.includes('querybytype') || url.includes('memberproduct/list')) {
+    console.log(`[HWWatchFace] ⌚ 触发表盘列表/详情价格全免费强改`);
+    // 处理列表页
     if (Array.isArray(obj.list)) {
       obj.list.forEach(item => {
         item.price = "0.00";
         item.discountPrice = "0.00";
+        item.renewPrice = "0.00";
         item.isFree = 1;
         item.isVipFree = 1;
-        item.feeType = "0";
-        item.priceType = "0";
         item.freeForVip = 1;
         item.vipFree = true;
+        item.feeType = "0";
+        item.priceType = "0";
+        item.contentPrivType = "1";
+        if (item.rightSubtitle1) item.rightSubtitle1 = "免费";
+        if (item.rightSubtitle2) item.rightSubtitle2 = "免费";
+      });
+    }
+    // 处理分类/VIP商品页 (productInfoList)
+    if (Array.isArray(obj.productInfoList)) {
+      obj.productInfoList.forEach(item => {
+        item.price = "0.00";
+        item.discountPrice = "0.00";
+        item.userType = "1";
       });
     }
   }
+
+  // 专项 3：下单/购买 API 拦截 (OrderAdd)
+  if (url.includes('order/add') || url.includes('OrderAdd')) {
+    console.log(`[HWWatchFace] 💳 触发下单支付拦截伪造`);
+    obj.resultCode = "0";
+    obj.resultcode = "0";
+    obj.returnCode = "0";
+    obj.orderId = "8888888888888888";
+    obj.isVipOrder = true;
+    obj.payStatus = 1;
+  }
   
-  // 通用深度遍历解锁
+  // 专项 4：下载鉴权拦截 (downloadinfo/query 返回的是 base64 编码的 json)
+  if (url.includes('/downloadinfo/query')) {
+    console.log(`[HWWatchFace] ⬇️ 触发下载鉴权拦截`);
+    obj.resultcode = 0; // 必须是 0 成功
+    obj.resultinfo = "success";
+    obj.isOrdered = 1;
+    obj.subscriptionStatus = 1;
+    obj.memberStatus = "1";
+  }
+  
+  // 通用深度递归解锁
   obj = deepUnlock(obj);
   obj = fixDeviceList(obj);
   
   body = JSON.stringify(obj);
+  
+  if (isBase64) {
+    console.log(`[HWWatchFace] 重新进行 Base64 编码`);
+    body = B64.encode(body);
+  }
+  
   console.log(`[HWWatchFace] ✅ 处理成功`);
   
 } catch (e) {
-  // 如果不是普通 JSON，尝试 Base64 解码后再处理
-  try {
-    const rawStr = $response.body;
-    // 保护可能被 base64 包装的数据
-    if (rawStr && !rawStr.startsWith('{') && !rawStr.startsWith('[')) {
-      // 不做破坏性强改，记录日志
-      console.log(`[HWWatchFace] ℹ️ 非 JSON 标准串或加密串，保留原始响应`);
-    }
-  } catch (err) {}
+  console.log(`[HWWatchFace] ❌ 处理异常: ${e}`);
+  // 如果无法解析，保留原样
 }
 
 $done({ body: body });

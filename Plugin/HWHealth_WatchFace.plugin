@@ -1,7 +1,7 @@
-#!name = 华为运动健康 GT5 个人表盘与 VIP 会员表盘解锁
-#!desc = 解锁华为运动健康 App 中 GT5 等手表的自定义/个人表盘上传以及全量表盘商店 VIP 会员权限。
-#!author = ykybl0001
-#!version = 1.1.0
+#!name = 华为运动健康 GT5 个人表盘与全量 VIP 免付费解锁
+#!desc = 解锁华为运动健康 App 中 GT5 等手表的自定义/个人表盘上传以及全量表盘商店 VIP 会员权限与免付费下载。
+#!author = ykybl0002
+#!version = 1.3.0
 #!system = iOS
 #!system_version = 16.0
 #!loon_version = 3.0.0
@@ -16,8 +16,8 @@
 
 [Script]
 
-# 拦截华为主题/表盘/会员/权限校验 API
-http-response ^https?://[^/]*\.(hicloud|huawei|dbankcloud|dbankcdn)\.(com|cn)/[^\?]*(subscription|theme|watchface|wearable|face|feature|permission|privilege|entitle|capability|getThemeList|getMenu|queryall|CheckEx) script-path=HWHealth_WatchFace.js, requires-body=true, timeout=15, tag=HW_WatchFace_Unlock
+# 拦截华为主题/表盘/会员/权限校验/下单全量 API
+http-response ^https?://[^/]*\.(hicloud|huawei|dbankcloud|dbankcdn)\.(com|cn)/(servicesupport|Ring|Ring2|v1|v2)/.* script-path=HWHealth_WatchFace.js, requires-body=true, timeout=15, tag=HW_WatchFace_Unlock
 
 [MITM]
 hostname = *.hicloud.com, *.huawei.com, *.dbankcloud.cn, *.dbankcdn.cn, api-drcn.theme.dbankcloud.cn, query.hicloud.com, contentcenter-drcn.dbankcdn.cn
