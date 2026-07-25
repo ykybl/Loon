@@ -1,7 +1,7 @@
 /**
  * 华为运动健康 GT5 个人表盘与 VIP 会员全量表盘解锁脚本
- * 作者: ykybl0002
- * 版本: 1.3.0
+ * 作者: ykybl0003
+ * 版本: 1.4.0
  * 
  * 功能:
  * 1. 深度锁定 VIP 会员订阅 (memberStatus = "1", renewFlag = "1", validDate = 2099)
@@ -155,9 +155,12 @@ try {
   if (url.includes('/subscription/queryall')) {
     console.log(`[HWWatchFace] 👑 触发 VIP 订阅 API 强改 (queryall)`);
     obj.resultcode = "00000";
+    obj.resultCode = "00000";
     obj.resultinfo = "success.";
     obj.memberStatus = "1"; // ACTIVE_VIP (1 为有效会员)
     obj.hadRenewVip = "1";
+    obj.isVip = "1";
+    obj.vipStatus = "1";
     obj.expiredReminder = 0;
     obj.isYoung = "0";
     obj.isRecycling = "0";
@@ -165,32 +168,37 @@ try {
     const farDate = "2099-12-31 23:59:59";
     const startDate = "2024-01-01 00:00:00";
     
-    if (obj.subInfo) {
-      obj.subInfo.startDate = startDate;
-      obj.subInfo.validDate = farDate;
-      obj.subInfo.renewFlag = "1";
-      obj.subInfo.nextRenewTime = farDate;
-      if (obj.subInfo.productInfo) {
-        obj.subInfo.productInfo.price = "0.00";
-        obj.subInfo.productInfo.validDay = "36500";
-        obj.subInfo.productInfo.canRenewFlag = "1";
-        obj.subInfo.productInfo.discountPrice = "0.00";
-        obj.subInfo.productInfo.userType = "1"; // VIP 类型
-      }
-    }
+    // 如果用户从来没开过会员，subInfo 可能是 undefined，必须强制初始化
+    if (!obj.subInfo) obj.subInfo = {};
+    if (!obj.subInfo.productInfo) obj.subInfo.productInfo = {};
     
-    if (obj.renewInfo) {
-      obj.renewInfo.startDate = startDate;
-      obj.renewInfo.validDate = farDate;
-      obj.renewInfo.renewFlag = "1";
-      obj.renewInfo.nextRenewTime = farDate;
-      if (obj.renewInfo.productInfo) {
-        obj.renewInfo.productInfo.price = "0.00";
-        obj.renewInfo.productInfo.validDay = "36500";
-        obj.renewInfo.productInfo.canRenewFlag = "1";
-        obj.renewInfo.productInfo.userType = "1";
-      }
-    }
+    obj.subInfo.startDate = startDate;
+    obj.subInfo.validDate = farDate;
+    obj.subInfo.renewFlag = "1";
+    obj.subInfo.nextRenewTime = farDate;
+    
+    if (!obj.subInfo.productInfo.productCode) obj.subInfo.productInfo.productCode = "20250721200728"; // 注入抓包里的标准年卡ID
+    obj.subInfo.productInfo.price = "0.00";
+    obj.subInfo.productInfo.validDay = "36500";
+    obj.subInfo.productInfo.canRenewFlag = "1";
+    obj.subInfo.productInfo.discountPrice = "0.00";
+    obj.subInfo.productInfo.userType = "2"; // 2 = YEAR
+    obj.subInfo.productInfo.productType = "2";
+    
+    if (!obj.renewInfo) obj.renewInfo = {};
+    if (!obj.renewInfo.productInfo) obj.renewInfo.productInfo = {};
+    
+    obj.renewInfo.startDate = startDate;
+    obj.renewInfo.validDate = farDate;
+    obj.renewInfo.renewFlag = "1";
+    obj.renewInfo.nextRenewTime = farDate;
+    
+    if (!obj.renewInfo.productInfo.productCode) obj.renewInfo.productInfo.productCode = "20250721200728";
+    obj.renewInfo.productInfo.price = "0.00";
+    obj.renewInfo.productInfo.validDay = "36500";
+    obj.renewInfo.productInfo.canRenewFlag = "1";
+    obj.renewInfo.productInfo.userType = "2";
+    obj.renewInfo.productInfo.productType = "2";
   }
   
   // 专项 2：表盘与主题列表、详情、过滤 API
