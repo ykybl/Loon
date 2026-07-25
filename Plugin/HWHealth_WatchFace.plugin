@@ -1,0 +1,24 @@
+#!name = 华为运动健康 GT5 个人表盘解锁
+#!desc = 解锁华为运动健康 App 中 GT5 手表的个人/自定义表盘权限。需要先完成抓包确认 API 地址。
+#!author = ykybl0001
+#!version = 1.0.0
+#!system = iOS
+#!system_version = 16.0
+#!loon_version = 3.0.0
+#!tag = 华为, 表盘, GT5
+
+# ============================================================
+# ⚠️ 重要说明
+# 1. 本插件需要先通过 Loon 抓包找到真实的权限 API URL
+# 2. 当前 URL 规则为通用匹配，可能需要根据抓包结果精确化
+# 3. 安装后需在 Loon → 证书管理 中信任 CA 证书才能解密 HTTPS
+# ============================================================
+
+[Script]
+
+# 核心：拦截表盘权限/功能查询 API，自动解锁 personalWatchface 相关字段
+# URL 规则说明：匹配 hicloud.com / huawei.com 域名下包含表盘/功能/权限关键词的请求
+http-response ^https?://[^/]*\.(hicloud|huawei)\.com/[^\?]*(watchface|wearable|face|feature|permission|privilege|entitle|capability)[^\?]* script-path=HWHealth_WatchFace.js, requires-body=true, timeout=15, tag=HW_WatchFace_Unlock
+
+[MITM]
+hostname = *.hicloud.com, *.huawei.com, hmsp.hicloud.com, api.hicloud.com, consumer.huawei.com, cloud.huawei.com
